@@ -531,3 +531,9 @@ html body .screen.active, html body .screen.leaving, html body .screen.peek { wi
 /* pendant un geste ou apres un changement instantane : aucune animation CSS sur les pages, seul le style en ligne compte */
 html body .main[data-dir=none] .screen, html body .main[data-dir=none] .screen.active, html body .main[data-dir=none] .screen.leaving { animation: none !important; }
 html body .screen.peek { animation: none !important; }
+
+
+/* cartes avec une carte (map) : les coins restent arrondis sur Safari / iPad (WebGL + coins arrondis + calques GPU) */
+html body #s-map > .card, html body #s-home .card.map { border-radius: 30px; overflow: hidden; isolation: isolate; -webkit-mask-image: -webkit-radial-gradient(white, black); mask-image: radial-gradient(white, black); transform: translateZ(0); }
+html body .mapbox, html body .maplibregl-map, html body .maplibregl-canvas-container, html body .maplibregl-canvas { border-radius: inherit; }
+html body .mapbox { overflow: hidden; }
