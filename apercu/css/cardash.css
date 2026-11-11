@@ -360,3 +360,174 @@ html body #s-home .music .art.img, html body #s-music .np .art.img { background-
 /* barre d'arrivee, bandeau "plus rapide" et message : centres sans transform (l'animation d'apparition utilisait transform et les decalait a droite) */
 html body .eta, html body .fastbar { left: 0 !important; right: 0 !important; margin-left: auto !important; margin-right: auto !important; width: max-content !important; max-width: calc(100% - 300px); transform: none !important; }
 html body .toast { left: 0 !important; right: 0 !important; margin-left: auto !important; margin-right: auto !important; width: max-content; max-width: 80vw; transform: none !important; }
+
+/* =====================================================================
+   v170 : VRAI LIQUID GLASS CLEAR, epure et leger
+   - verre presque transparent : on voit le fond a travers, avec un liseré lumineux, un reflet en arc et une lueur interieure
+   - aucune grosse ombre portee (couteuse), aucun flou en direct, animations courtes et simples
+   ===================================================================== */
+:root {
+  --lg-fill: linear-gradient(135deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,.035) 38%, rgba(255,255,255,.02) 62%, rgba(255,255,255,.10) 100%);
+  --lg-rim: inset 0 0 0 1px rgba(255,255,255,.20), inset 0 1.5px 0 rgba(255,255,255,.55), inset 1.5px 0 0 rgba(255,255,255,.22), inset 0 -1.5px 0 rgba(255,255,255,.12), inset 0 0 28px rgba(255,255,255,.07);
+  --lg-over: linear-gradient(135deg, rgba(255,255,255,.20), rgba(255,255,255,.06) 55%, rgba(255,255,255,.14));
+}
+/* fond plus lumineux : c'est lui qui donne vie au verre */
+body::before { background:
+  radial-gradient(60% 55% at 10% 6%, rgba(76,128,255,.62), transparent 64%),
+  radial-gradient(52% 48% at 94% 12%, rgba(176,98,255,.48), transparent 64%),
+  radial-gradient(64% 54% at 76% 106%, rgba(0,205,225,.52), transparent 64%),
+  radial-gradient(44% 44% at 22% 98%, rgba(255,150,120,.30), transparent 62%), #050813 !important; }
+
+/* cartes et menu : verre clair, quasi transparent */
+html body .card, html body .dock, html body #s-home .glance, html body #s-home .card.music {
+  background: var(--lg-fill) !important; border: 0 !important; box-shadow: var(--lg-rim) !important; border-radius: 30px; }
+html body #s-home .card.map, html body #s-map > .card { box-shadow: var(--lg-rim) !important; }
+html body .dock { border-radius: 34px; }
+
+/* par-dessus la carte : meme verre, un peu plus dense pour rester lisible */
+html body .spd, html body .wx, html body .zone, html body .rbtn, html body .pill, html body .panel, html body .lpanel, html body .banner, html body .eta, html body .fastbar, html body .toast {
+  background: linear-gradient(135deg, rgba(30,38,60,.72), rgba(14,18,32,.66)) !important; border: 0 !important; box-shadow: var(--lg-rim) !important; }
+html body .rbtn.on { background: linear-gradient(160deg, rgba(255,255,255,.95), rgba(228,236,255,.85)) !important; }
+
+/* boutons et onglets : verre, sans ombre portee */
+html body .btn, html body .chip, html body .tab, html body #s-home .music .ctrl button, html body #s-music .ctrl button {
+  background: var(--lg-over) !important; border: 0 !important; box-shadow: var(--lg-rim) !important; }
+html body .btn.primary, html body .fab, html body #s-home .fab, html body .play, html body #s-home .music .ctrl .play, html body #s-music .ctrl .play {
+  background: linear-gradient(165deg, rgba(255,255,255,.97), rgba(226,234,252,.9)) !important; box-shadow: inset 0 1.5px 0 #fff, inset 0 -6px 14px rgba(120,140,200,.25) !important; }
+html body .tab.on, html body .seg button.on { background: rgba(255,255,255,.30) !important; box-shadow: var(--lg-rim) !important; }
+html body .art, html body #s-home .music .art, html body #s-music .np .art { box-shadow: var(--lg-rim) !important; border: 0 !important; }
+
+/* menu : pastille = une lentille de verre claire, plus lumineuse que le reste */
+html body .navpill { background: linear-gradient(150deg, rgba(255,255,255,.36), rgba(255,255,255,.10) 60%, rgba(255,255,255,.22)); border: 0;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.35), inset 0 1.5px 0 rgba(255,255,255,.8), inset 0 -10px 18px rgba(255,255,255,.10), 0 4px 14px rgba(0,0,0,.18); }
+html body .navpill.drag { transition: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.5), inset 0 1.5px 0 #fff, inset 0 -12px 22px rgba(255,255,255,.16), 0 8px 22px rgba(0,0,0,.28); }
+html body .dock .ico.hot { color: #fff; }
+html body .dock .ico { touch-action: none; }
+
+/* pas de reduction des grandes cartes au toucher : seulement les petits boutons */
+html body .card.pr, html body .card:active { transform: none !important; opacity: 1 !important; }
+html body .pr { transform: scale(.95) !important; opacity: .9; }
+
+/* animations : courtes, simples, sans rebond sur les grandes surfaces */
+@keyframes slideR { from { opacity: 0; transform: translate3d(28px,0,0); } to { opacity: 1; transform: none; } }
+@keyframes slideL { from { opacity: 0; transform: translate3d(-28px,0,0); } to { opacity: 1; transform: none; } }
+html body .screen.active, html body .screen.active > .card, html body .screen.active > .card ~ .card { animation: none !important; }
+html body .main[data-dir=r] .screen.active:not(#s-map) { animation: slideR .26s cubic-bezier(.2,.8,.25,1) both !important; }
+html body .main[data-dir=l] .screen.active:not(#s-map) { animation: slideL .26s cubic-bezier(.2,.8,.25,1) both !important; }
+html body #s-map.active { animation: none !important; }
+html body .banner:not(.hidden), html body .eta:not(.hidden), html body .meta:not(.hidden), html body .panel:not(.hidden), html body .lpanel:not(.hidden) { animation-duration: .24s !important; }
+
+/* les pages (sauf la carte) laissent passer le glisser horizontal vers l'appli, le defilement vertical reste natif */
+html body .screen:not(#s-map) { touch-action: pan-y; }
+
+
+/* =====================================================================
+   v180 : boutons de navigation en icones (menu et carte), sans texte
+   ===================================================================== */
+html body .dock .ico .lb { display: none !important; }
+html body .dock .ico { width: 80px; height: 80px; border-radius: 26px; flex-direction: row; gap: 0; }
+html body .dock .ico svg { width: 36px; height: 36px; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+html body .rbtn { display: flex; align-items: center; justify-content: center; padding: 0; font-size: 0; }
+html body .rbtn svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+html body .rbtn.on svg { stroke: #0b0f1a; }
+html body #btnVoice .v-off { display: none; }
+html body #btnVoice.muted .v-on { display: none; }
+html body #btnVoice.muted .v-off { display: block; }
+html body #btnVoice.muted { color: rgba(255,255,255,.6); }
+
+/* menu : les boutons tiennent entierement dans la barre (la colonne est assez large), pas de contour de focus */
+html body .app { grid-template-columns: 124px 1fr; }
+html body .dock { overflow: hidden; }
+html body .dock .ico { width: 74px; height: 74px; border-radius: 24px; }
+html body .dock .ico svg { width: 34px; height: 34px; }
+html body .navpill { border-radius: 24px; }
+html body button:focus, html body button:focus-visible, html body [data-go]:focus { outline: none !important; }
+
+/* barre de recherche : en haut a gauche, elle ne bouge plus quand le clavier s'ouvre ; les resultats s'ouvrent en dessous */
+html body #s-map .search { top: 18px !important; bottom: auto !important; left: 18px !important; right: auto !important; transform: none !important;
+  width: min(560px, calc(100% - 150px)) !important; justify-content: flex-start; }
+html body #s-map .search .panel { max-height: min(46vh, 360px); overflow-y: auto; }
+html body #s-map .search { flex-direction: column !important; }
+
+
+/* ===== v190 : reglages simplifies : Navigation, Circulation, Voiture, Avance ===== */
+html body .off { display: none !important; }
+html body details.adv { margin-top: 26px; border-top: 1px solid rgba(255,255,255,.10); }
+html body details.adv > summary { list-style: none; cursor: pointer; min-height: 64px; display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.62); }
+html body details.adv > summary::-webkit-details-marker { display: none; }
+html body details.adv > summary::after { content: ""; width: 10px; height: 10px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); transition: transform .25s ease; margin-right: 6px; }
+html body details.adv[open] > summary::after { transform: rotate(225deg); }
+
+
+/* ===== pictogramme du signal GPS en bas du menu (remplace le texte en haut de l'ecran) ===== */
+html body .status { display: none !important; }
+html body .gpsic { position: absolute; left: 50%; bottom: 20px; margin-left: -25px; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2; padding: 0;
+  background: linear-gradient(150deg, rgba(255,255,255,.20), rgba(255,255,255,.06)) !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1.5px 0 rgba(255,255,255,.5) !important; border: 0 !important; color: #fff; }
+html body .gpsic svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+html body .gpsic .sl { display: none; }
+html body .gpsic::after { content: ""; position: absolute; right: 4px; top: 4px; width: 11px; height: 11px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 2px rgba(10,14,24,.85); }
+html body .gpsic[data-gps=weak]::after { background: #fbbf24; }
+html body .gpsic[data-gps=wait]::after { background: #fff; animation: gpsPulse 1.2s ease-in-out infinite; }
+html body .gpsic[data-gps=wait] svg { animation: gpsPulse 1.2s ease-in-out infinite; }
+html body .gpsic[data-gps=lost] { color: #ff7a72; box-shadow: inset 0 0 0 1.5px rgba(255,107,99,.7), inset 0 1.5px 0 rgba(255,255,255,.4) !important; }
+html body .gpsic[data-gps=lost]::after { background: #ff5a52; }
+html body .gpsic[data-gps=lost] .sl { display: block; }
+@keyframes gpsPulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+
+/* carte verrouillee : le doigt ne deplace plus la carte */
+html body #mapMain.locked, html body #mapMain.locked .maplibregl-canvas { cursor: default; }
+
+
+/* =====================================================================
+   v250 : VRAI DEFILEMENT ENTRE LES PAGES : l'ancienne page glisse dehors pendant que la nouvelle arrive (sens selon la direction)
+   ===================================================================== */
+@keyframes inFromRight { from { opacity: 0; transform: translate3d(34%,0,0) scale(.965); } to { opacity: 1; transform: none; } }
+@keyframes inFromLeft  { from { opacity: 0; transform: translate3d(-34%,0,0) scale(.965); } to { opacity: 1; transform: none; } }
+@keyframes outToLeft   { from { opacity: 1; transform: none; } to { opacity: 0; transform: translate3d(-26%,0,0) scale(.95); } }
+@keyframes outToRight  { from { opacity: 1; transform: none; } to { opacity: 0; transform: translate3d(26%,0,0) scale(.95); } }
+html body .main { overflow: hidden; position: relative; }
+html body .main[data-dir=r] .screen.active { animation: inFromRight .46s cubic-bezier(.22,.9,.28,1) both !important; }
+html body .main[data-dir=l] .screen.active { animation: inFromLeft .46s cubic-bezier(.22,.9,.28,1) both !important; }
+html body .main[data-dir=r] #s-map.active, html body .main[data-dir=l] #s-map.active { animation-duration: .46s !important; }
+html body .screen.leaving { display: grid !important; position: absolute; top: 14px; bottom: 14px; left: 0; right: 14px; height: auto; z-index: 0; pointer-events: none; }
+html body .main[data-dir=r] .screen.leaving { animation: outToLeft .4s cubic-bezier(.4,0,.6,1) both !important; }
+html body .main[data-dir=l] .screen.leaving { animation: outToRight .4s cubic-bezier(.4,0,.6,1) both !important; }
+html body .screen.active { z-index: 1; }
+
+
+/* animations de page : memes selecteurs que les anciennes regles pour qu'elles prennent le dessus */
+html body .main[data-dir=r] .screen.active:not(#s-map) { animation: inFromRight .46s cubic-bezier(.22,.9,.28,1) both !important; }
+html body .main[data-dir=l] .screen.active:not(#s-map) { animation: inFromLeft .46s cubic-bezier(.22,.9,.28,1) both !important; }
+html body .main[data-dir=r] #s-map.active { animation: inFromRight .46s cubic-bezier(.22,.9,.28,1) both !important; }
+html body .main[data-dir=l] #s-map.active { animation: inFromLeft .46s cubic-bezier(.22,.9,.28,1) both !important; }
+
+/* bouton de verrouillage : en bas a droite de la carte ; credit replie a sa gauche */
+html body #s-map #btnLock { position: absolute; right: 18px; bottom: 18px; z-index: 1100; width: 64px; height: 64px; }
+html body #s-map .maplibregl-ctrl-bottom-right { right: 92px !important; bottom: 18px !important; }
+html body .maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show) .maplibregl-ctrl-attrib-inner { display: none !important; }
+html body .maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show) { background: transparent !important; }
+
+/* credit des cartes : petit bouton "i" discret (le texte s'ouvre au toucher) */
+html body .maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show) { width: 34px; height: 34px; border-radius: 50%; background: rgba(10,14,24,.72) !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); margin: 0 !important; }
+html body .maplibregl-ctrl-attrib-button { filter: invert(1); opacity: .85; width: 34px; height: 34px; }
+
+
+/* =====================================================================
+   v270 : PAGES COMME SUR iPHONE / iPAD / CARPLAY : glissement horizontal des pages, sans fondu ni zoom.
+   ===================================================================== */
+@keyframes pgInR  { from { transform: translate3d(calc(100% + 14px),0,0); } to { transform: none; } }
+@keyframes pgInL  { from { transform: translate3d(calc(-100% - 14px),0,0); } to { transform: none; } }
+@keyframes pgOutL { from { transform: none; } to { transform: translate3d(calc(-100% - 14px),0,0); } }
+@keyframes pgOutR { from { transform: none; } to { transform: translate3d(calc(100% + 14px),0,0); } }
+html body .main[data-dir=r] .screen.active:not(#s-map), html body .main[data-dir=r] #s-map.active { animation: pgInR .42s cubic-bezier(.22,.9,.28,1) both !important; }
+html body .main[data-dir=l] .screen.active:not(#s-map), html body .main[data-dir=l] #s-map.active { animation: pgInL .42s cubic-bezier(.22,.9,.28,1) both !important; }
+html body .main[data-dir=r] .screen.leaving { animation: pgOutL .42s cubic-bezier(.22,.9,.28,1) both !important; }
+html body .main[data-dir=l] .screen.leaving { animation: pgOutR .42s cubic-bezier(.22,.9,.28,1) both !important; }
+html body .main[data-dir=none] .screen.active { animation: none !important; }
+html body .screen.peek { display: grid !important; position: absolute; top: 14px; bottom: 14px; left: 0; right: 14px; height: auto; z-index: 0; pointer-events: none; }
+html body .screen.active, html body .screen.leaving, html body .screen.peek { will-change: transform; }
+
+/* pendant un geste ou apres un changement instantane : aucune animation CSS sur les pages, seul le style en ligne compte */
+html body .main[data-dir=none] .screen, html body .main[data-dir=none] .screen.active, html body .main[data-dir=none] .screen.leaving { animation: none !important; }
+html body .screen.peek { animation: none !important; }

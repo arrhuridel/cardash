@@ -102,6 +102,9 @@
     });
     m.addControl(new ML.AttributionControl({ compact: true, customAttribution: 'OpenFreeMap © OpenMapTiles, données © OpenStreetMap' }), 'bottom-right');
     if (interactive) m.touchZoomRotate.disableRotation();
+    // le texte de credit reste disponible (licence OpenStreetMap) mais replie derriere le petit bouton "i"
+    function foldCredit() { CD.qsa('.maplibregl-ctrl-attrib', el).forEach(function (e) { e.classList.remove('maplibregl-compact-show'); e.removeAttribute('open'); }); }
+    setTimeout(foldCredit, 0); setTimeout(foldCredit, 700); m.on('resize', function () { setTimeout(foldCredit, 50); });
     return m;
   }
   function meEl() {
@@ -110,10 +113,21 @@
     d.innerHTML = '<div class="me-pulse"></div><svg class="me-arrow" viewBox="-20 -20 40 40"><path d="M0 -17 L13 15 L0 8 L-13 15 Z" fill="#fff" stroke="#262b36" stroke-width="3" stroke-linejoin="round"/></svg>';
     return d;
   }
+  // Verrou de la carte : la carte ne bouge plus au toucher, ce qui permet de balayer pour changer de page
+  var mapLocked = true;      // par defaut la carte est verrouillee : on balaie pour changer de page ; le bouton la deverrouille
+  function applyLock() {
+    var m = maps.main; if (!m) return;
+    ['dragPan', 'touchZoomRotate', 'doubleClickZoom', 'scrollZoom', 'keyboard'].forEach(function (h) { if (m[h]) m[h][mapLocked ? 'disable' : 'enable'](); });
+    if (!mapLocked && m.touchZoomRotate) m.touchZoomRotate.disableRotation();
+    var b = document.getElementById('btnLock'); if (b) b.classList.toggle('on', mapLocked);
+    var mc = m.getContainer(); if (mc) mc.classList.toggle('locked', mapLocked);
+  }
+  CD.mapLock = true;
+  function setLock(on) { mapLocked = !!on; CD.mapLock = mapLocked; applyLock(); }
   function ensureMap(key) {
     if (maps[key]) return maps[key];
     var m = mkMap($(key === 'mini' ? 'mapMini' : 'mapMain'), key === 'main');
-    maps[key] = m;
+    maps[key] = m; if (key === 'main') setTimeout(applyLock, 0);
     markers[key] = new ML.Marker({ element: meEl(), rotationAlignment: 'map', pitchAlignment: 'map' }).setLngLat([S.lon, S.lat]).addTo(m);
     m.on('load', function () {
       m.addSource('routealt', { type: 'geojson', data: EMPTY });
@@ -280,7 +294,19 @@
     }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
   }
   function stopGps() { if (watchId != null) navigator.geolocation.clearWatch(watchId); watchId = null; }
-  function setStatus(t) { $('status').textContent = t; }
+  var gpsPrev = '';
+  function setStatus(t) {
+    $('status').textContent = t;
+    var g = $('gpsIc'); if (!g) return;
+    var m = /pr[ée]cision (\d+)/.exec(t), cls = 'wait';
+    if (m) cls = +m[1] <= 50 ? 'ok' : 'weak';
+    else if (/lent/i.test(t)) cls = 'weak';
+    else if (/perdu|refus|indisponible/i.test(t)) cls = 'lost';
+    else if (/d[ée]mo/i.test(t)) cls = 'ok';
+    g.dataset.gps = cls; g.setAttribute('aria-label', t); g.dataset.txt = t;
+    if (cls === 'lost' && gpsPrev !== 'lost') CD.toast(t);      // un message court, une seule fois, quand le signal disparait
+    gpsPrev = cls;
+  }
 
   function setMode(m) {
     S.mode = ST.mode = m; CD.saveSettings();
@@ -1063,7 +1089,7 @@
 
   // ====================== LIAISONS ======================
   CD.nav = {
-    maps: maps, dbgR: function () { return R; },
+    maps: maps, dbgR: function () { return R; }, setLock: setLock, isLocked: function () { return mapLocked; },
     onOption: function (k) { if (k === 'incidentsOn') { if (ST.incidentsOn) incFetch(S); else { incs = []; drawIncs(); } } },
     _testIncidents: function (j) { incs = parseIncidents(j); drawIncs(); },
     applyTraffic: applyTraffic,
@@ -1115,7 +1141,7 @@
       m.easeTo({ center: [S.lon, S.lat], bearing: S.heading, zoom: Math.max(m.getZoom(), 16), offset: [0, m.getContainer().clientHeight * 0.2], duration: 500 });
     };
     var bv = $('btnVoice');
-    function voiceLbl() { bv.textContent = ST.voiceOn ? 'Voix' : 'Muet'; bv.classList.toggle('on', ST.voiceOn); }
+    function voiceLbl() { bv.classList.toggle('on', ST.voiceOn); bv.classList.toggle('muted', !ST.voiceOn); }
     bv.onclick = function () { ST.voiceOn = !ST.voiceOn; CD.saveSettings(); voiceLbl(); if (!ST.voiceOn) try { window.speechSynthesis.cancel(); } catch (e) {} CD.emit('settings'); };
     CD.on('settings', voiceLbl); voiceLbl();
     CD.qsa('[data-mode]').forEach(function (b) { b.addEventListener('click', function () { setMode(b.dataset.mode); }); });
@@ -1128,6 +1154,14 @@
     }
     CD.nav.renderLayersPanel = renderLayersPanel;
     $('btnLayers').onclick = function () { $('layersPanel').classList.toggle('hidden'); this.classList.toggle('on', !$('layersPanel').classList.contains('hidden')); renderLayersPanel(); };
+    // le panneau se ferme quand on touche en dehors (carte, autre bouton...) ou quand on quitte la page
+    function closeLayers() { $('layersPanel').classList.add('hidden'); $('btnLayers').classList.remove('on'); }
+    document.addEventListener('pointerdown', function (e) {
+      if ($('layersPanel').classList.contains('hidden')) return;
+      if (e.target.closest('#layersPanel') || e.target.closest('#btnLayers')) return;
+      closeLayers();
+    }, true);
+    CD.layersClose = closeLayers;
     CD.qsa('[data-lay]').forEach(function (b) {
       b.onclick = function () { ST.layers[b.dataset.lay] = !ST.layers[b.dataset.lay]; CD.saveSettings(); applyLayerVis(); renderLayersPanel(); };
     });

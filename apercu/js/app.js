@@ -5,11 +5,21 @@
   var MAXV = 200, lastBeep = 0, wakeLock = null, screen = 'home';
 
   // ====================== NAVIGATION ENTRE ECRANS ======================
-  function go(name) {
+  var ORDER = ['home', 'map', 'music', 'settings'];
+  function go(name, opts) {
+    opts = opts || {};
+    var mainEl = document.querySelector('.main'); if (mainEl) mainEl.dataset.dir = opts.instant ? 'none' : (ORDER.indexOf(name) >= ORDER.indexOf(screen) ? 'r' : 'l');
+    var prevEl = document.querySelector('.screen.active'), nextEl = document.getElementById('s-' + name);
+    if (prevEl && nextEl && prevEl !== nextEl && !opts.instant) {                  // l'ancienne page reste visible le temps de glisser dehors
+      prevEl.style.transform = ''; prevEl.style.opacity = '';
+      prevEl.classList.add('leaving'); setTimeout(function () { prevEl.classList.remove('leaving'); }, 460);
+    }
+    if (nextEl) { nextEl.style.transform = ''; nextEl.style.opacity = ''; nextEl.style.transition = ''; }
     screen = name;
     CD.qsa('.screen').forEach(function (s) { s.classList.toggle('active', s.id === 's-' + name); });
     CD.qsa('.dock [data-go]').forEach(function (b) { b.classList.toggle('on', b.dataset.go === name); });
     movePill(true);
+    if (CD.layersClose) CD.layersClose();
     CD.nav.onShow(name);
     if (name === 'music') CD.music.onShow();
     if (name === 'settings') { renderSettings(); renderCar(); }
@@ -41,10 +51,93 @@
     pill.style.transform = to; pillPos = { x: x, y: y };
   }
   window.addEventListener('resize', function () { setTimeout(function () { movePill(false); }, 80); });
+
+  // ---- Glisser le doigt sur le menu : la pastille suit le doigt, on lache pour ouvrir la page ----
+  (function () {
+    var dock = document.querySelector('.dock'), drag = null, noClick = false;
+    function btns() { return CD.qsa('.dock [data-go]'); }
+    dock.addEventListener('pointerdown', function (e) {
+      var b = e.target.closest('.ico[data-go]'); if (!b || !pill) return;
+      drag = { sy: e.clientY, y0: pillPos ? pillPos.y : b.offsetTop, moved: false };
+    }, { passive: true });
+    dock.addEventListener('pointermove', function (e) {
+      if (!drag) return; var dy = e.clientY - drag.sy;
+      if (!drag.moved) { if (Math.abs(dy) < 10) return; drag.moved = true; try { dock.setPointerCapture(e.pointerId); } catch (x) {} pill.classList.add('drag'); }
+      var bs = btns(), lo = bs[0].offsetTop, hi = bs[bs.length - 1].offsetTop, y = Math.max(lo, Math.min(hi, drag.y0 + dy));
+      pillPos = { x: bs[0].offsetLeft, y: y };
+      pill.style.transform = 'translate3d(' + pillPos.x + 'px,' + y + 'px,0) scale(1.1,1.1)';
+      var best = null, bd = 1e9; bs.forEach(function (b) { var d = Math.abs(b.offsetTop - y); if (d < bd) { bd = d; best = b; } });
+      bs.forEach(function (b) { b.classList.toggle('hot', b === best); });
+    });
+    function end() {
+      if (!drag) return; var d = drag; drag = null; if (!d.moved) return;
+      pill.classList.remove('drag'); noClick = true; setTimeout(function () { noClick = false; }, 60);
+      var bs = btns(), hot = bs.filter(function (b) { return b.classList.contains('hot'); })[0];
+      bs.forEach(function (b) { b.classList.remove('hot'); });
+      if (hot) { if (hot.dataset.go === screen) movePill(true); else go(hot.dataset.go); }
+    }
+    dock.addEventListener('pointerup', end); dock.addEventListener('pointercancel', end);
+    dock.addEventListener('click', function (e) { if (noClick) { e.stopPropagation(); e.preventDefault(); } }, true);
+  })();
+
+  // ---- Pages comme sur iPhone / iPad / CarPlay : la page suit le doigt, la page voisine arrive a cote, on lache pour finir le geste ----
+  (function () {
+    var main = document.querySelector('.main'), st = null, EDGE = 36, EASE = 'transform .42s cubic-bezier(.22,.9,.28,1)';
+    function el(n) { return document.getElementById('s-' + n); }
+    main.addEventListener('pointerdown', function (e) {
+      if (st && st.anim) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (e.target.closest('input, textarea, select, .sw, [role=slider], .mnav, .shelfrow, .subtabs')) { st = null; return; }   // ces zones ont leur propre glisser
+      var r = main.getBoundingClientRect(), fromEdge = e.clientX - r.left < EDGE || r.right - e.clientX < EDGE;
+      if (screen === 'map' && !fromEdge && !(CD.nav && CD.nav.isLocked && CD.nav.isLocked())) { st = null; return; }     // sur la carte deverrouillee, le doigt deplace la carte
+      st = { x: e.clientX, y: e.clientY, t: Date.now(), mode: null, vx: 0, lx: e.clientX, lt: Date.now() };
+    }, { passive: true });
+    main.addEventListener('pointermove', function (e) {
+      if (!st || st.anim) return;
+      var dx = e.clientX - st.x, dy = e.clientY - st.y, now = Date.now();
+      if (st.mode === null) {
+        if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx)) { st = null; return; }
+        if (Math.abs(dx) < 14 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
+        st.mode = 'drag'; st.dir = dx < 0 ? 1 : -1;
+        var i = ORDER.indexOf(screen) + st.dir;
+        st.cur = el(screen); st.nbName = i >= 0 && i < ORDER.length ? ORDER[i] : null; st.nb = st.nbName ? el(st.nbName) : null;
+        st.W = st.cur.offsetWidth + 14;
+        st.cur.style.transition = 'none';
+        main.dataset.dir = 'none';          // pas d'animation CSS pendant que le doigt conduit la page (sinon elle ecrase le mouvement)
+        if (st.nb) {
+          if (st.nbName === 'settings') { try { renderSettings(); renderCar(); } catch (x) {} }
+          st.nb.classList.add('peek'); st.nb.style.transition = 'none';
+        }
+      }
+      var k = st.nb ? 1 : 0.22, x = dx * k;
+      x = st.dir > 0 ? Math.min(0, x) : Math.max(0, x);             // pas de retour au-dela du point de depart
+      var dt = Math.max(1, now - st.lt); st.vx = 0.8 * st.vx + 0.2 * ((e.clientX - st.lx) / dt); st.lx = e.clientX; st.lt = now;
+      st.x2 = x;
+      st.cur.style.transform = 'translate3d(' + x.toFixed(1) + 'px,0,0)';
+      if (st.nb) st.nb.style.transform = 'translate3d(' + (x + st.dir * st.W).toFixed(1) + 'px,0,0)';
+    }, { passive: true });
+    function finish(e) {
+      var s = st; if (!s || s.mode !== 'drag' || s.anim) { if (!s || s.mode === null) st = null; return; }
+      s.anim = true;
+      var commit = !!s.nb && (Math.abs(s.x2) > s.W * 0.28 || s.vx * s.dir * -1 > 0.45 && Math.abs(s.x2) > 24);
+      s.cur.style.transition = EASE; if (s.nb) s.nb.style.transition = EASE;
+      if (commit) {
+        s.cur.style.transform = 'translate3d(' + (-s.dir * s.W) + 'px,0,0)'; s.nb.style.transform = 'translate3d(0,0,0)';
+      } else {
+        s.cur.style.transform = 'translate3d(0,0,0)'; if (s.nb) s.nb.style.transform = 'translate3d(' + (s.dir * s.W) + 'px,0,0)';
+      }
+      setTimeout(function () {
+        [s.cur, s.nb].forEach(function (n) { if (n) { n.style.transition = ''; n.style.transform = ''; n.classList.remove('peek'); } });
+        if (commit) go(s.nbName, { instant: true });
+        if (st === s) st = null;
+      }, 430);
+    }
+    ['pointerup', 'pointercancel'].forEach(function (ev) { main.addEventListener(ev, finish, { passive: true }); });
+  })();
   setTimeout(function () { movePill(false); }, 0); setTimeout(function () { movePill(false); }, 400);
 
   // ---- Retour tactile immediat : le bouton reagit des que le doigt le touche (sans attendre le clic) ----
-  var PRESS = 'button, .btn, .sug, .li, .chip, .tab, [data-go], .now', pressed = null, pressAt = 0;
+  var PRESS = 'button, .btn, .sug, .li, .chip, .tab', pressed = null, pressAt = 0;
   function release() { var p = pressed; pressed = null; if (p) setTimeout(function () { p.classList.remove('pr'); }, Math.max(0, 110 - (Date.now() - pressAt))); }
   document.addEventListener('pointerdown', function (e) {
     var t = e.target.closest ? e.target.closest(PRESS) : null;
@@ -79,9 +172,9 @@
     $('dur').textContent = pad(Math.floor(s / 60)) + ':' + pad(s % 60);
     $('max').textContent = Math.round(CD.spd(S.max));
     $('alt').textContent = S.alt == null ? '--' : Math.round(S.alt);
-    var lim = (ST.autoLimit && S.limit) ? S.limit : (ST.alertOn ? ST.alertLimit : null);
+    var lim = (ST.autoLimit && S.limit) ? S.limit : null;
     CD.qsa('[data-lim]').forEach(function (e) { e.classList.toggle('hidden', !lim); if (lim) e.textContent = Math.round(CD.spd(lim)); });
-    var over = !!lim && ST.alertOn && S.speed > lim + 0.5;
+    var over = !!lim && S.speed > lim + 20;      // alerte rouge + bip : 20 km/h au-dessus de la limite de la route
     CD.qsa('.spd').forEach(function (e) { e.classList.toggle('over', over); });
     if (over && Date.now() - lastBeep > 8000) { lastBeep = Date.now(); CD.beep(); }
   }
@@ -315,4 +408,16 @@
   var lock = null;
   function ask() { try { if (navigator.wakeLock && document.visibilityState === 'visible') navigator.wakeLock.request('screen').then(function (l) { lock = l; }).catch(function () {}); } catch (e) {} }
   document.addEventListener('visibilitychange', ask); ask();
+})();
+
+// Pictogramme GPS : un toucher affiche l'etat du signal
+(function () { var g = document.getElementById('gpsIc'); if (g) g.addEventListener('click', function () { CD.toast(g.dataset.txt || 'Signal GPS'); }); })();
+
+// Bouton "balayer" de la carte : verrouille la carte pour pouvoir changer de page en balayant
+(function () {
+  var b = document.getElementById('btnLock'); if (!b) return;
+  b.addEventListener('click', function () {
+    var on = !CD.nav.isLocked(); CD.nav.setLock(on);
+    CD.toast(on ? 'Carte verrouillée : balaie à gauche ou à droite pour changer de page' : 'Carte déverrouillée');
+  });
 })();

@@ -36,6 +36,9 @@
     CD.qsa('.mprog').forEach(function (e) { e.style.visibility = live ? 'hidden' : 'visible'; });
     $('seek').disabled = live;
     if (live) { $('tDur').textContent = cur ? 'direct' : '0:00'; $('seek').value = 0; $('tCur').textContent = '0:00'; }
+    var srcNow = !cur ? '' : cur.kind === 'radio' ? 'radio' : (cur.list && cur.list.indexOf('apple') === 0 ? 'apple' : 'files');
+    $('s-music').dataset.now = srcNow;
+    $('npSrc').textContent = { '': '', radio: 'En direct', apple: cur && cur.list === 'apple-full' ? '' : 'Extrait de 30 secondes', files: '' }[srcNow];
     setArt(cur && cur.art);
     if ('mediaSession' in navigator && cur) {
       try { navigator.mediaSession.metadata = new MediaMetadata({ title: cur.name, artist: cur.sub, artwork: cur.art ? [{ src: cur.art, sizes: '300x300' }] : [] }); } catch (e) {}
@@ -85,7 +88,8 @@
   function row(item, subtitle, extra) {
     var on = cur && cur.url === item.url;
     return CD.el('li', { class: 'li' + (on ? ' on' : ''), onclick: function () { play(item); } },
-      CD.el('div', { style: 'min-width:0' }, CD.el('div', { class: 't1', text: item.name }), CD.el('div', { class: 't2', text: subtitle })), extra || null);
+      CD.el('span', { class: 'lead ' + (item.kind === 'radio' ? 'radio' : 'file') }),
+      CD.el('div', { class: 'lt', style: 'min-width:0' }, CD.el('div', { class: 't1', text: item.name }), CD.el('div', { class: 't2', text: subtitle })), extra || null);
   }
   function renderAll() {
     var ul = $('radioList'); ul.innerHTML = '';
@@ -116,7 +120,10 @@
 
   function showTab(t) {
     tab = t;
-    CD.qsa('[data-mtab]').forEach(function (b) { b.classList.toggle('on', b.dataset.mtab === t); });
+    CD.qsa('.subtabs [data-mtab]').forEach(function (b) { b.classList.toggle('on', b.dataset.mtab === t); });
+    var srcName = t === 'favs' ? 'radio' : t;
+    $('s-music').dataset.src = srcName;
+    CD.qsa('.src').forEach(function (b) { b.classList.toggle('on', b.dataset.src === srcName); });
     ['radio', 'favs', 'files', 'apple'].forEach(function (k) { $('mp-' + k).classList.toggle('hidden', k !== t); });
     if (t === 'radio' && !stations.length) loadRadios('');
     if (t === 'apple') amShow();
@@ -254,6 +261,180 @@
     }, 500);
   }
 
+  // ====================== VUES : Accueil, Radio, Bibliotheque, Rechercher ======================
+  var VIEWS = { home: 'Accueil', radio: 'Radio', lib: 'Bibliothèque', search: 'Rechercher' };
+  var view = 'home', libKind = 'playlists', viewSeq = 0;
+
+  function mkApi(path, params) { return am.mk.api.music(path, params).then(function (r) { return r && r.data; }); }
+  // un element de l'API Apple Music -> { type, id, name, sub, art }
+  function amItem(x, forced) {
+    var a = x.attributes || {}, pp = a.playParams || {};
+    var t = String(forced || pp.kind || x.type || '').replace('library-', '').replace(/s$/, '');
+    var sub = t === 'playlist' ? (a.curatorName || 'Playlist') : (a.artistName || '') + (t === 'song' && a.albumName ? ' · ' + a.albumName : '');
+    return { type: t, id: pp.catalogId || pp.id || x.id, name: a.name || (a.title && a.title.stringForDisplay) || '', sub: sub, art: artUrl(a.artwork, 400) };
+  }
+  function playable(it) { return it.name && (it.type === 'song' || it.type === 'album' || it.type === 'playlist'); }
+  function coverCard(it) {
+    return CD.el('button', { class: 'cc', onclick: function () { amPlayFull(it); } },
+      CD.el('span', { class: 'cv', style: it.art ? 'background-image:url("' + it.art + '")' : '' }),
+      CD.el('b', { text: it.name }), CD.el('span', { class: 'cs', text: it.sub || '' }));
+  }
+  function shelf(title, items) {
+    items = items.filter(playable); if (!items.length) return null;
+    var row = CD.el('div', { class: 'shelfrow' }); items.forEach(function (it) { row.appendChild(coverCard(it)); });
+    return CD.el('section', { class: 'shelf' }, CD.el('h2', { text: title }), row);
+  }
+  function rowItem(it) {
+    var on = cur && cur.name === it.name && (cur.sub === it.sub || !cur.sub);
+    return CD.el('li', { class: 'row' + (on ? ' on' : ''), onclick: function () { amPlayFull(it); } },
+      CD.el('span', { class: 'cv sm', style: it.art ? 'background-image:url("' + it.art + '")' : '' }),
+      CD.el('div', { class: 'rt' }, CD.el('b', { text: it.name }), CD.el('span', { text: it.sub || '' })));
+  }
+  function note(id, text, btn) {
+    var n = $(id); n.innerHTML = ''; n.classList.toggle('hidden', !text);
+    if (text) { n.appendChild(CD.el('p', { text: text })); if (btn) n.appendChild(btn); }
+  }
+  // l'etat de connexion : jeton present -> MusicKit, autorisation -> bouton de connexion
+  function amReady(msgId) {
+    if (!amFull()) { note(msgId, 'Ajoute ton jeton Apple Music dans Réglages (Avancé) pour écouter les morceaux entiers.'); return Promise.reject(new Error('sans jeton')); }
+    note(msgId, 'Chargement…');
+    return amInit().then(function (mk) {
+      if (mk.isAuthorized) { note(msgId, ''); return mk; }
+      note(msgId, 'Connecte ton compte Apple Music.', CD.el('button', { class: 'btn primary', text: 'Se connecter', onclick: function () { amConnect(); setTimeout(function () { showView(view, true); }, 1500); } }));
+      return Promise.reject(new Error('non connecte'));
+    }).catch(function (e) { if (!/sans jeton|non connecte/.test(e && e.message)) note(msgId, 'Apple Music indisponible : ' + ((e && e.message) || 'erreur')); throw e; });
+  }
+
+  function loadHome() {
+    var my = ++viewSeq, out = $('shelves'); out.innerHTML = '';
+    amReady('homeMsg').then(function () {
+      var calls = [
+        mkApi('/v1/me/recent/played', { limit: 10 }).catch(function () { return null; }),
+        mkApi('/v1/me/recommendations', { limit: 3 }).catch(function () { return null; }),
+        mkApi('/v1/me/library/playlists', { limit: 12 }).catch(function () { return null; })
+      ];
+      return Promise.all(calls);
+    }).then(function (r) {
+      if (my !== viewSeq || !r) return;
+      var recent = ((r[0] && r[0].data) || []).map(function (x) { return amItem(x); });
+      var s = shelf('Écouté récemment', recent); if (s) out.appendChild(s);
+      ((r[1] && r[1].data) || []).forEach(function (rec) {
+        var items = ((rec.relationships && rec.relationships.contents && rec.relationships.contents.data) || []).map(function (x) { return amItem(x); });
+        var t = (rec.attributes && rec.attributes.title && rec.attributes.title.stringForDisplay) || 'Pour toi';
+        var sh = shelf(t, items); if (sh) out.appendChild(sh);
+      });
+      var pls = ((r[2] && r[2].data) || []).map(function (x) { return amItem(x, 'playlist'); });
+      var sp = shelf('Mes playlists', pls); if (sp) out.appendChild(sp);
+      if (!out.children.length) note('homeMsg', 'Rien à afficher pour le moment. Écoute un titre ou ajoute des playlists dans Apple Music.');
+    }).catch(function () {});
+  }
+
+  function loadLib() {
+    var my = ++viewSeq, out = $('libOut'); out.innerHTML = '';
+    CD.qsa('[data-lib]').forEach(function (b) { b.classList.toggle('on', b.dataset.lib === libKind); });
+    amReady('libMsg').then(function () { return mkApi('/v1/me/library/' + libKind, { limit: libKind === 'songs' ? 100 : 50 }); }).then(function (r) {
+      if (my !== viewSeq) return;
+      var items = ((r && r.data) || []).map(function (x) { return amItem(x, libKind.replace(/s$/, '')); }).filter(playable);
+      if (!items.length) { note('libMsg', 'Rien dans cette section.'); return; }
+      if (libKind === 'songs') { var ul = CD.el('ul', { class: 'rows' }); items.forEach(function (it) { ul.appendChild(rowItem(it)); }); out.appendChild(ul); }
+      else { var g = CD.el('div', { class: 'cgrid' }); items.forEach(function (it) { g.appendChild(coverCard(it)); }); out.appendChild(g); }
+    }).catch(function () {});
+  }
+
+  var sTimer = null;
+  function runSearch(q) {
+    var my = ++viewSeq, out = $('sOut'); out.innerHTML = '';
+    if (q.length < 2) { note('sMsg', ''); return; }
+    if (amFull() && am.mk && am.mk.isAuthorized) {
+      amSearchFull(q).then(function (list) {
+        if (my !== viewSeq) return;
+        note('sMsg', list.length ? '' : 'Aucun résultat pour « ' + q + ' ».');
+        [['song', 'Titres'], ['album', 'Albums'], ['playlist', 'Playlists']].forEach(function (g) {
+          var items = list.filter(function (x) { return x.type === g[0]; }); if (!items.length) return;
+          var ul = CD.el('ul', { class: 'rows' }); items.forEach(function (it) { ul.appendChild(rowItem(it)); });
+          out.appendChild(CD.el('section', { class: 'shelf' }, CD.el('h2', { text: g[1] }), ul));
+        });
+      }).catch(function (e) { note('sMsg', 'Recherche impossible : ' + ((e && e.message) || 'connexion')); });
+    } else {
+      amSearchPreview(q).then(function (list) {
+        if (my !== viewSeq) return;
+        note('sMsg', list.length ? 'Extraits de 30 secondes. Ajoute ton jeton Apple Music dans Réglages (Avancé) pour les morceaux entiers.' : 'Aucun résultat pour « ' + q + ' ».');
+        var ul = CD.el('ul', { class: 'rows' });
+        list.forEach(function (it) { ul.appendChild(CD.el('li', { class: 'row', onclick: function () { play(it); } },
+          CD.el('span', { class: 'cv sm', style: it.art ? 'background-image:url("' + it.art + '")' : '' }),
+          CD.el('div', { class: 'rt' }, CD.el('b', { text: it.name }), CD.el('span', { text: it.sub || '' })))); });
+        out.appendChild(ul);
+      }).catch(function () { note('sMsg', 'Recherche impossible : vérifie la connexion.'); });
+    }
+  }
+
+  function showView(v, force) {
+    if (v === view && !force && v !== 'home') { /* deja affichee */ }
+    view = v; $('s-music').dataset.view = v; $('vTitle').textContent = VIEWS[v];
+    CD.qsa('[data-mview]').forEach(function (b) { b.classList.toggle('on', b.dataset.mview === v); });
+    Object.keys(VIEWS).forEach(function (k) { $('v-' + k).classList.toggle('hidden', k !== v); });
+    mnavPill(true);
+    if (v === 'home') loadHome();
+    else if (v === 'radio') showTab('radio');
+    else if (v === 'lib') loadLib();
+    else if (v === 'search') { note('sMsg', ''); if ($('sSearch').value.trim().length >= 2) runSearch($('sSearch').value.trim()); }
+  }
+
+  // ---- Pastille de verre du menu Musique : elle glisse d'un onglet a l'autre, et on peut la faire glisser du doigt ----
+  var mp = null, mpAnim = null, mpBox = null;
+  function mnavPill(animated) {
+    var nav = document.querySelector('.mnav'), btn = nav && nav.querySelector('button.on');
+    if (!nav || !btn || !btn.offsetWidth) return;
+    if (!mp) { mp = document.createElement('div'); mp.className = 'mpill'; mp.setAttribute('aria-hidden', 'true'); nav.insertBefore(mp, nav.firstChild); }
+    var to = { left: btn.offsetLeft, width: btn.offsetWidth, top: btn.offsetTop, height: btn.offsetHeight };
+    if (mpAnim) { try { mpAnim.cancel(); } catch (e) {} mpAnim = null; }
+    if (animated && mpBox && mp.animate && (mpBox.left !== to.left || mpBox.width !== to.width)) {
+      var a = mpBox, l = Math.min(a.left, to.left), r = Math.max(a.left + a.width, to.left + to.width);
+      mpAnim = mp.animate([
+        { left: a.left + 'px', width: a.width + 'px' },
+        { left: l + 'px', width: (r - l) + 'px', offset: 0.45 },
+        { left: to.left + 'px', width: to.width + 'px' }
+      ], { duration: 460, easing: 'cubic-bezier(.3,.75,.25,1)' });
+    }
+    mp.style.left = to.left + 'px'; mp.style.width = to.width + 'px'; mp.style.top = to.top + 'px'; mp.style.height = to.height + 'px';
+    mpBox = to;
+  }
+  function initMnavDrag() {
+    var nav = document.querySelector('.mnav'), drag = null, noClick = false;
+    function btns() { return Array.prototype.slice.call(nav.querySelectorAll('button')); }
+    nav.addEventListener('pointerdown', function (e) { if (!e.target.closest('button') || !mp) return; drag = { sx: e.clientX, l0: mpBox ? mpBox.left : 0, moved: false }; }, { passive: true });
+    nav.addEventListener('pointermove', function (e) {
+      if (!drag) return; var dx = e.clientX - drag.sx;
+      if (!drag.moved) { if (Math.abs(dx) < 10) return; drag.moved = true; try { nav.setPointerCapture(e.pointerId); } catch (x) {} mp.classList.add('drag'); if (mpAnim) { try { mpAnim.cancel(); } catch (x) {} } }
+      var bs = btns(), first = bs[0], last = bs[bs.length - 1], w = mpBox.width;
+      var x = Math.max(first.offsetLeft, Math.min(last.offsetLeft + last.offsetWidth - w, drag.l0 + dx));
+      mp.style.left = x + 'px'; mpBox = { left: x, width: w, top: mpBox.top, height: mpBox.height };
+      var cx = x + w / 2, best = null, bd = 1e9;
+      bs.forEach(function (b) { var d = Math.abs(b.offsetLeft + b.offsetWidth / 2 - cx); if (d < bd) { bd = d; best = b; } });
+      bs.forEach(function (b) { b.classList.toggle('hot', b === best); });
+    });
+    function end() {
+      if (!drag) return; var d = drag; drag = null; if (!d.moved) return;
+      mp.classList.remove('drag'); noClick = true; setTimeout(function () { noClick = false; }, 60);
+      var hot = btns().filter(function (b) { return b.classList.contains('hot'); })[0];
+      btns().forEach(function (b) { b.classList.remove('hot'); });
+      if (hot) { if (hot.dataset.mview === view) mnavPill(true); else showView(hot.dataset.mview); }
+    }
+    nav.addEventListener('pointerup', end); nav.addEventListener('pointercancel', end);
+    nav.addEventListener('click', function (e) { if (noClick) { e.stopPropagation(); e.preventDefault(); } }, true);
+    window.addEventListener('resize', function () { setTimeout(function () { mnavPill(false); }, 80); });
+  }
+
+  function initViews() {
+    initMnavDrag();
+    CD.qsa('[data-mview]').forEach(function (b) { b.onclick = function () { showView(b.dataset.mview); }; });
+    CD.qsa('[data-lib]').forEach(function (b) { b.onclick = function () { libKind = b.dataset.lib; loadLib(); }; });
+    $('sSearch').addEventListener('input', function () { clearTimeout(sTimer); var q = this.value.trim(); sTimer = setTimeout(function () { runSearch(q); }, 300); });
+    // connexion automatique si un jeton existe deja
+    if (amFull()) amInit().catch(function () {});
+  }
+  CD.musicView = function (v) { showView(v, true); };
+
   function init() {
     audio = $('audio');
     audio.volume = ST.volume / 100; $('volume').value = ST.volume;
@@ -310,9 +491,9 @@
         navigator.mediaSession.setActionHandler('previoustrack', function () { step(-1); });
       } catch (e) {}
     }
-    initApple();
+    initApple(); initViews();
     renderAll(); setNow();
   }
-  CD.music = { _am: am, _useApple: function (it) { amPlayFull(it); }, onShow: function () { if (tab === 'radio' && !stations.length) loadRadios(''); } };
+  CD.music = { _am: am, _useApple: function (it) { amPlayFull(it); }, onShow: function () { showView(view, true); } };
   document.addEventListener('DOMContentLoaded', init);
 })();

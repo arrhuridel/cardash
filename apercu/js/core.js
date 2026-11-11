@@ -63,6 +63,7 @@
   };
 
   // ---- Etat du vehicule ----
+  CD.settings.volume = 100;      // plus de barre de son : le volume se regle avec les boutons de l'iPad
   CD.settings.mode = 'gps';      // version de production : toujours le vrai GPS
   CD.state = {
     mode: CD.settings.mode, speed: 0, heading: 0, alt: null, acc: null,

@@ -1,0 +1,113 @@
+/* =====================================================================
+   PAGE MUSIQUE : sobre, facon app Musique d'iOS.
+   Lecteur a gauche (pochette, titre, commandes), contenu a droite (Accueil, Radio, Bibliotheque, Rechercher).
+   Une seule couleur d'accent (rouge Apple Music), tout le reste est blanc sur verre clair.
+   ===================================================================== */
+#s-music { --red: #fa2d48; }
+html body #s-music { grid-template-columns: .78fr 1.5fr; }
+
+/* ---------- lecteur ---------- */
+html body #s-music .np { padding: 34px 30px 28px; gap: 0; align-items: stretch; justify-content: center; text-align: left; }
+html body #s-music .np .art { width: 100%; max-width: 330px; height: auto; aspect-ratio: 1; margin: 0 auto 26px; border-radius: 20px; display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.08) !important; box-shadow: 0 12px 34px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.14) !important; }
+html body #s-music .np .art svg { width: 38%; height: 38%; stroke: rgba(255,255,255,.7); fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+html body #s-music .np .art .ic-radio { display: none; }
+html body #s-music[data-now=radio] .np .art .ic-radio { display: block; }
+html body #s-music[data-now=radio] .np .art .ic-note { display: none; }
+html body #s-music .npinfo { display: flex; flex-direction: column; gap: 4px; min-width: 0; margin: 0 auto 16px; width: 100%; max-width: 330px; }
+html body #s-music .np .ti { font-size: 25px; font-weight: 600; line-height: 1.2; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+html body #s-music .np .ar { font-size: 18px; color: rgba(255,255,255,.62); text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html body #s-music .npsrc { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--red); padding: 0; background: none; box-shadow: none; }
+html body #s-music .npsrc:empty { display: none; }
+html body #s-music .npsrc::before { content: none; }
+
+html body #s-music .seekrow { display: block; width: 100%; max-width: 330px; margin: 0 auto 10px; }
+html body #s-music[data-now=radio] .seekrow { display: none; }
+html body #s-music .times { display: flex; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,.55); margin-top: 6px; }
+html body #s-music .seekrow input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 22px; background: transparent !important; }
+html body #s-music .seekrow input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: rgba(255,255,255,.22); }
+html body #s-music .seekrow input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); }
+
+html body #s-music .ctrl { display: flex; align-items: center; justify-content: space-between; max-width: 330px; width: 100%; margin: 6px auto 0; gap: 0; }
+html body #s-music .ctrl button { width: 56px; height: 56px; padding: 0; border-radius: 50%; background: transparent !important; box-shadow: none !important; border: 0 !important; color: #fff; display: flex; align-items: center; justify-content: center; }
+html body #s-music .ctrl button svg { width: 30px; height: 30px; fill: currentColor; stroke: none; }
+html body #s-music .ctrl #btnShuffle svg, html body #s-music .ctrl #btnFav svg { width: 24px; height: 24px; opacity: .75; }
+html body #s-music .ctrl #btnFav svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+html body #s-music .ctrl #btnFav.on svg { fill: var(--red); stroke: var(--red); opacity: 1; }
+html body #s-music .ctrl #btnShuffle.on { color: var(--red); }
+html body #s-music .ctrl .play { width: 78px; height: 78px; background: #fff !important; color: #0b0f1a; box-shadow: none !important; }
+html body #s-music .ctrl .play svg, html body #s-music .ctrl .play svg * { fill: #0b0f1a !important; stroke: none !important; width: 34px; height: 34px; }
+html body #s-music[data-now=radio] #btnShuffle, html body #s-music[data-now=apple] #btnFav, html body #s-music[data-now=files] #btnFav, html body #s-music[data-now=""] #btnShuffle { visibility: hidden; }
+html body #s-music .volrow { display: none !important; }
+
+/* ---------- contenu ---------- */
+html body #s-music .lib { padding: 22px 28px 0; display: flex; flex-direction: column; min-height: 0; gap: 0; }
+html body .mnav { display: flex; gap: 6px; padding: 5px; border-radius: 99px; background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,.10); align-self: flex-start; }
+html body .mnav button { display: flex; align-items: center; gap: 9px; height: 46px; padding: 0 20px; border-radius: 99px; background: transparent !important; box-shadow: none !important; border: 0 !important; color: rgba(255,255,255,.78); font-size: 16px; font-weight: 500; white-space: nowrap; }
+html body .mnav button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+html body .mnav button.on { background: #fff !important; color: #0b0f1a; }
+html body .vtitle { font-size: 34px; font-weight: 700; letter-spacing: -.01em; margin: 22px 0 12px; }
+html body #s-music .views { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 24px; -webkit-overflow-scrolling: touch; }
+html body #s-music .view.hidden { display: none; }
+html body #s-music .libbody.hidden { display: none; }
+
+html body .note { padding: 8px 0 18px; color: rgba(255,255,255,.66); font-size: 16px; line-height: 1.45; max-width: 520px; }
+html body .note.hidden { display: none; }
+html body .note .btn { margin-top: 14px; }
+
+/* rangees d'albums */
+html body .shelf { margin-bottom: 26px; }
+html body .shelf h2 { font-size: 21px; font-weight: 700; margin: 0 0 12px; }
+html body .shelfrow { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+html body .shelfrow::-webkit-scrollbar { display: none; }
+html body .cc { flex: none; width: 150px; text-align: left; background: transparent !important; box-shadow: none !important; border: 0 !important; padding: 0; color: #fff; scroll-snap-align: start; display: flex; flex-direction: column; gap: 3px; }
+html body .cc .cv { width: 150px; height: 150px; border-radius: 12px; background: rgba(255,255,255,.10) center / cover no-repeat; box-shadow: 0 6px 18px rgba(0,0,0,.3), inset 0 0 0 1px rgba(255,255,255,.10); margin-bottom: 8px; }
+html body .cc b { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 150px; }
+html body .cc .cs { font-size: 13px; color: rgba(255,255,255,.58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 150px; }
+html body .cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px 16px; }
+html body .cgrid .cc, html body .cgrid .cc .cv, html body .cgrid .cc b, html body .cgrid .cc .cs { width: 100%; }
+html body .cgrid .cc .cv { height: auto; aspect-ratio: 1; }
+
+/* listes */
+html body .rows { list-style: none; margin: 0; padding: 0; }
+html body .row { display: flex; align-items: center; gap: 16px; min-height: 72px; padding: 8px 4px; border-bottom: 1px solid rgba(255,255,255,.08); cursor: pointer; }
+html body .row .cv.sm { flex: none; width: 54px; height: 54px; border-radius: 8px; background: rgba(255,255,255,.10) center / cover no-repeat; }
+html body .row .rt { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+html body .row .rt b { font-size: 17px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html body .row .rt span { font-size: 14px; color: rgba(255,255,255,.58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html body .row.on .rt b { color: var(--red); }
+
+/* radio */
+html body .subtabs { display: none; gap: 8px; margin-bottom: 14px; }
+html body #v-radio .subtabs, html body .subtabs.show { display: flex; }
+html body .subtabs button { min-height: 42px; padding: 0 20px; border-radius: 99px; font-size: 15px; color: rgba(255,255,255,.75); background: rgba(255,255,255,.07) !important; box-shadow: none !important; border: 0 !important; }
+html body .subtabs button.on { background: #fff !important; color: #0b0f1a; }
+html body #s-music .srow { display: flex; gap: 10px; margin-bottom: 8px; }
+html body #s-music .srow .inp { flex: 1; background: rgba(255,255,255,.08) !important; border-radius: 14px; box-shadow: none !important; padding-left: 18px; }
+html body #s-music .srow .btn { border-radius: 14px; }
+html body #s-music .li { display: flex; align-items: center; gap: 16px; min-height: 72px; justify-content: flex-start; border-radius: 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+html body #s-music .li .lt { flex: 1; min-width: 0; }
+html body #s-music .li .t1 { font-size: 17px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html body #s-music .li .t2 { font-size: 14px; color: rgba(255,255,255,.58); }
+html body #s-music .li.on { background: none; }
+html body #s-music .li.on .t1 { color: var(--red); }
+html body .lead { flex: none; width: 54px; height: 54px; border-radius: 12px; background-color: rgba(255,255,255,.10); background-position: center; background-repeat: no-repeat; background-size: 52% 52%; box-shadow: none; }
+html body .lead.radio, html body .lead.file { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.7' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='2'/%3E%3Cpath d='M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M4.9 4.9a10 10 0 0 0 0 14.2M19.1 4.9a10 10 0 0 1 0 14.2'/%3E%3C/svg%3E"); }
+html body .hint { font-size: 14px; color: rgba(255,255,255,.55); }
+
+/* pas de barres de defilement visibles */
+html body #s-music .views, html body #s-music .libbody, html body #s-music .shelfrow { scrollbar-width: none; -ms-overflow-style: none; }
+html body #s-music .views::-webkit-scrollbar, html body #s-music .libbody::-webkit-scrollbar, html body #s-music .shelfrow::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+html body #s-music .views, html body #s-music .view, html body #s-music .libbody, html body #s-music .list, html body #s-music .rows, html body #s-music .srow { width: 100%; max-width: none; box-sizing: border-box; }
+html body #s-music .views { display: block; }
+
+/* menu Musique : pastille de verre qui glisse (et se fait glisser) */
+html body .mnav { position: relative; }
+html body .mnav button { position: relative; z-index: 1; transition: color .25s ease, transform .3s var(--bounce); }
+html body .mnav button.on, html body .mnav button.hot { background: transparent !important; color: #fff; }
+html body .mpill { position: absolute; z-index: 0; border-radius: 99px; pointer-events: none;
+  background: linear-gradient(155deg, rgba(255,255,255,.42), rgba(255,255,255,.12) 60%, rgba(255,255,255,.24));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.38), inset 0 1.5px 0 rgba(255,255,255,.85), inset 0 -9px 16px rgba(255,255,255,.10), 0 4px 14px rgba(0,0,0,.2); }
+html body .mpill.drag { box-shadow: inset 0 0 0 1px rgba(255,255,255,.55), inset 0 1.5px 0 #fff, inset 0 -10px 18px rgba(255,255,255,.18), 0 8px 22px rgba(0,0,0,.3); transform: scale(1.04); }
+html body .mnav { touch-action: none; }
