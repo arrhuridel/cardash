@@ -11,8 +11,8 @@
 <meta name="format-detection" content="telephone=no">
 <title>CarDash</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css">
-<link rel="stylesheet" href="css/style.css?v=143">
-<link rel="stylesheet" href="css/cardash.css?v=143">
+<link rel="stylesheet" href="css/style.css?v=152">
+<link rel="stylesheet" href="css/cardash.css?v=152">
 </head>
 <body>
 <div id="safeProbe" style="position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)"></div>
@@ -23,10 +23,10 @@
 <div class="app">
   <nav class="dock">
     <div class="clock"><div class="t num" id="time">--:--</div><div class="d" id="date"></div></div>
-    <button class="ico on" data-go="home" aria-label="Tableau de bord"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
-    <button class="ico" data-go="map" aria-label="Carte"><svg viewBox="0 0 24 24"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></button>
-    <button class="ico" data-go="music" aria-label="Musique"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></button>
-    <button class="ico" data-go="settings" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.3 3h-4l-.4 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.4 2.7h4l.4-2.7a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg></button>
+    <button class="ico on" data-go="home" aria-label="Tableau de bord"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span class="lb">Accueil</span></button>
+    <button class="ico" data-go="map" aria-label="Carte"><svg viewBox="0 0 24 24"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span class="lb">Carte</span></button>
+    <button class="ico" data-go="music" aria-label="Musique"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg><span class="lb">Musique</span></button>
+    <button class="ico" data-go="settings" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.3 3h-4l-.4 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.4 2.7h4l.4-2.7a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg><span class="lb">Réglages</span></button>
     <div class="spacer"></div>
     <div class="mode"><button data-mode="demo" class="on">Démo</button><button data-mode="gps">GPS</button></div>
   </nav>
@@ -185,7 +185,7 @@
     <!-- ================= REGLAGES ================= -->
     <section class="screen" id="s-settings">
       <div class="card"><div class="setbody">
-        <div class="sec">Position</div>
+        <div class="sec demo-only">Position</div>
         <div class="set demo-only"><div><div class="k">Source de position</div><div class="d">Démo : la voiture se déplace toute seule sur la carte. GPS : vraie position de l'appareil (il faut l'autoriser).</div></div>
           <div class="ctl"><div class="seg"><button data-mode="demo" class="on">Démo</button><button data-mode="gps">GPS</button></div></div></div>
         <div class="set demo-only"><div><div class="k">Départ de la démo</div><div class="d" id="demoStartLbl"></div></div>
@@ -266,10 +266,10 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js"></script>
-<script src="js/core.js?v=143"></script>
-<script src="js/nav.js?v=143"></script>
-<script src="js/music.js?v=143"></script>
-<script src="js/app.js?v=143"></script>
+<script src="js/core.js?v=152"></script>
+<script src="js/nav.js?v=152"></script>
+<script src="js/music.js?v=152"></script>
+<script src="js/app.js?v=152"></script>
 <script>
 /* Petits ecrans (iPhone en paysage) : on dessine l'ecran a la taille d'une tablette puis on le reduit pour qu'il tienne en entier. */
 (function () {

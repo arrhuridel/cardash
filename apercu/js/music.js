@@ -21,7 +21,7 @@
   function isFav(u) { return favs.some(function (f) { return f.url === u; }); }
 
   function setArt(url) {
-    CD.qsa('.art').forEach(function (e) { e.style.backgroundImage = url ? 'url("' + url + '")' : ''; e.classList.toggle('img', !!url); });
+    CD.qsa('.art').forEach(function (e) { e.style.backgroundImage = url ? 'url("' + url + '")' : ''; e.style.setProperty('--art', url ? 'url("' + url + '")' : 'none'); e.classList.toggle('img', !!url); });
   }
   function isApple() { return !!cur && cur.kind === 'apple'; }
   function setNow() {

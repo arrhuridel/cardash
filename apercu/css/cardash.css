@@ -330,3 +330,29 @@ html body .maplibregl-ctrl-attrib.maplibregl-compact { background: rgba(8,9,12,.
 
 /* production : pas de mode demo visible */
 html body .dock .mode, html body .demo-only { display: none !important; }
+
+
+/* =====================================================================
+   v150 : menu centre avec noms, pochette visible, carte direction sans cadre
+   ===================================================================== */
+/* pochette : l'image passe par une variable, plus aucun fond ne peut la cacher */
+html body .art.img { background-image: var(--art) !important; background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; }
+html body .art.img svg { opacity: 0 !important; }
+
+/* menu : icones centrees verticalement, chacune avec son nom ; l'heure reste en haut */
+html body .dock { justify-content: center; gap: 10px; padding: 16px 0; }
+html body .dock .clock { position: absolute; top: 18px; left: 0; right: 0; margin: 0; }
+html body .dock .spacer { display: none; }
+html body .dock .ico { width: 82px; height: 92px; border-radius: 26px; flex-direction: column; justify-content: center; align-items: center; gap: 7px; padding: 0; }
+html body .dock .ico svg { width: 34px; height: 34px; flex: none; }
+html body .dock .ico .lb { font-size: 13px; font-weight: 500; letter-spacing: .01em; line-height: 1; color: inherit; }
+html body .navpill { border-radius: 26px; }
+
+/* carte "direction" de l'accueil : aucun cadre interieur, texte centre qui respire */
+html body #s-home .glance .banner { background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 30px !important; width: 100% !important; max-width: 100% !important; margin: 0; }
+html body #s-home .glance .banner .sub { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-align: center; line-height: 1.3; font-size: clamp(16px, 4.6cqw, 22px); margin-top: 10px; }
+html body #s-home .glance .banner .big { font-size: clamp(48px, 18cqw, 96px); }
+html body #s-home .glance .banner > div:last-child { width: 100%; text-align: center; }
+html body #s-home .glance .meta { left: 30px; right: 30px; bottom: 26px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.16); }
+/* pochette : meme regle avec la priorite des regles de l'accueil et de la page musique */
+html body #s-home .music .art.img, html body #s-music .np .art.img { background-image: var(--art) !important; background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; }
