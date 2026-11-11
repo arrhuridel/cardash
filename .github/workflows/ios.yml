@@ -26,7 +26,7 @@ jobs:
           npx cap add ios
           npx cap sync ios
 
-      - name: Reglages iOS (position, paysage, plein ecran)
+      - name: "Reglages iOS : position, paysage, plein ecran"
         run: |
           PLIST=ios/App/App/Info.plist
           B=/usr/libexec/PlistBuddy
@@ -42,7 +42,7 @@ jobs:
           $B -c "Add :UIRequiresFullScreen bool true" $PLIST || true
           cat $PLIST | head -60
 
-      - name: Compiler (sans signature : Sideloadly signera)
+      - name: "Compiler sans signature (Sideloadly signera)"
         run: |
           xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Release \
             -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
