@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CarDash">
+<meta name="theme-color" content="#08090d">
+<meta name="format-detection" content="telephone=no">
+<title>CarDash</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css">
+<link rel="stylesheet" href="css/style.css?v=133">
+<link rel="stylesheet" href="css/cardash.css?v=133">
+</head>
+<body>
+<div id="safeProbe" style="position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)"></div>
+<div id="rotHint" aria-hidden="true"><div>Tourne l'iPhone en mode paysage</div></div>
+<div class="status" id="status">Démo</div>
+<audio id="audio" preload="none"></audio>
+
+<div class="app">
+  <nav class="dock">
+    <div class="clock"><div class="t num" id="time">--:--</div><div class="d" id="date"></div></div>
+    <button class="ico on" data-go="home" aria-label="Tableau de bord"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
+    <button class="ico" data-go="map" aria-label="Carte"><svg viewBox="0 0 24 24"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></button>
+    <button class="ico" data-go="music" aria-label="Musique"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></button>
+    <button class="ico" data-go="settings" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.3 3h-4l-.4 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.4 2.7h4l.4-2.7a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg></button>
+    <div class="spacer"></div>
+    <div class="mode"><button data-mode="demo" class="on">Démo</button><button data-mode="gps">GPS</button></div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ================= ACCUEIL ================= -->
+    <section class="screen active" id="s-home">
+      <div class="card map" data-go="map">
+        <div id="mapMini" class="mapbox"></div>
+        <div class="spd"><b class="num" data-speed>0</b><span data-unit>KM/H</span><i class="lim num hidden" data-lim>90</i></div>
+        <div class="zone hidden"><svg viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>Zone de danger</div>
+        <div class="wx hidden" data-wx></div>
+        <button class="fab" data-go="map">Destination</button>
+      </div>
+
+      <div class="card music">
+        <div class="now" data-go="music" style="cursor:pointer">
+          <div class="art"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></div>
+          <div><div class="ti" data-np="title">Rien en lecture</div><div class="ar" data-np="sub">Choisis une source</div></div>
+        </div>
+        <div class="mprog"><i data-prog></i></div>
+        <div class="ctrl">
+          <button data-mus="prev" aria-label="Précédent"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+          <button class="play" data-mus="play" aria-label="Lecture"><svg viewBox="0 0 24 24" data-playicon><path d="M8 5v14l11-7z"/></svg></button>
+          <button data-mus="next" aria-label="Suivant"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+        </div>
+      </div>
+
+      <div class="card carmini glance">
+        <div class="gclock"><div class="gt num" id="gTime">--:--</div><div class="gd" id="gDate"></div></div>
+        <div class="banner hidden" id="miniBanner">
+          <div class="turn"><svg viewBox="0 0 24 24" id="mbSvg"><path id="mbIcon" d=""/></svg></div>
+          <div><div class="big" id="mbBig"></div><div class="sub" id="mbSub"></div></div>
+        </div>
+        <div class="meta hidden" id="miniEta">
+          <div><b class="num" id="mEtaDur"></b><span>Durée</span></div>
+          <div><b class="num" id="mEtaDist"></b><span>Distance</span></div>
+          <div><b class="num" id="mEtaClock"></b><span>Arrivée</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CARTE ================= -->
+    <section class="screen" id="s-map">
+      <div class="card">
+        <div id="mapMain" class="mapbox"></div>
+        <div class="zone hidden"><svg viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>Zone de danger</div>
+        <div class="spd"><b class="num" data-speed>0</b><span data-unit>KM/H</span><i class="lim num hidden" data-lim>90</i></div>
+
+        <div class="search" id="searchPanel">
+          <div class="pill">
+            <svg class="mag" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+            <input id="searchInput" class="inp" type="search" placeholder="Où allez-vous ?" enterkeyhint="search" autocomplete="off" autocorrect="off" spellcheck="false">
+            <button class="pclear hidden" id="searchClear" aria-label="Effacer"><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg></button>
+          </div>
+          <div class="panel hidden" id="searchMsg"></div>
+          <div class="panel sheet hidden"><ul class="sugs" id="results"></ul></div>
+          <div class="panel sheet hidden" id="recentsBox">
+            <div class="chips">
+              <button class="btn chip" id="chipHome"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7M6 10v10h12V10M10 20v-6h4v6"/></svg>Domicile</button>
+              <button class="btn chip" id="chipWork"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M4 13h16"/></svg>Travail</button>
+            </div>
+            <ul class="sugs" id="favPlaces"></ul>
+            <div class="slabel" id="recLabel">Récents</div>
+            <ul class="sugs" id="recents"></ul>
+          </div>
+          <div class="panel hidden" id="routePanel">
+            <div class="rd" id="routeDest"></div>
+            <div class="rs"><b class="num" id="rsDur"></b><span id="rsDist"></span> · <span id="rsEta"></span></div>
+            <div class="srow hidden" id="altChips" style="flex-wrap:wrap;margin-bottom:8px"></div>
+            <div class="srow"><button class="btn primary go" id="btnStart">Y aller</button><button class="btn" id="btnCancel">Annuler</button></div>
+            <div class="srow chips" style="margin-top:8px"><button class="btn small" id="saveHome">Domicile</button><button class="btn small" id="saveWork">Travail</button><button class="btn small" id="saveFav">Favori</button></div>
+          </div>
+        </div>
+
+        <div class="banner hidden" id="banner">
+          <div class="turn"><svg viewBox="0 0 24 24" id="bnSvg"><path id="bnIcon" d=""/></svg></div>
+          <div><div class="big" id="bnBig"></div><div class="sub" id="bnSub"></div><div class="sub then" id="bnThen"></div></div>
+        </div>
+        <div class="lanes hidden" id="lanes"></div>
+        <div class="fastbar hidden" id="fastBanner"><span id="fastTxt"></span><button class="btn small primary" id="fastYes">Prendre</button><button class="btn small" id="fastNo">Ignorer</button></div>
+        <div class="eta hidden" id="etaBar">
+          <div><b class="num" id="etaDur"></b><span>Durée</span></div>
+          <div><b class="num" id="etaDist"></b><span>Distance</span></div>
+          <div><b class="num" id="etaClock"></b><span>Arrivée</span></div>
+          <button class="btn danger" id="btnStop">Arrêter</button>
+        </div>
+        <div class="wx hidden" data-wx></div>
+        <div class="lpanel hidden" id="layersPanel">
+          <div class="label" style="margin-bottom:6px">Affichage de la carte</div>
+          <div class="lrow"><span>Noms de rues et villes</span><button class="sw" data-lay="labels" role="switch" aria-label="Noms"></button></div>
+          <div class="lrow"><span>Bâtiments en 3D</span><button class="sw" data-lay="buildings" role="switch" aria-label="Bâtiments"></button></div>
+          <div class="lrow"><span>Parcs</span><button class="sw" data-lay="parks" role="switch" aria-label="Parcs"></button></div>
+          <div class="lrow"><span>Eau et rivières</span><button class="sw" data-lay="water" role="switch" aria-label="Eau"></button></div>
+          <div class="lrow"><span>Stations-service</span><button class="sw" data-poi="fuel" role="switch" aria-label="Stations-service"></button></div>
+          <div class="lrow"><span>Parkings</span><button class="sw" data-poi="parking" role="switch" aria-label="Parkings"></button></div>
+          <div class="lrow"><span>Bornes de recharge</span><button class="sw" data-poi="charging" role="switch" aria-label="Bornes de recharge"></button></div>
+          <div class="lrow"><span>Accidents et travaux</span><button class="sw" data-opt="incidentsOn" role="switch" aria-label="Accidents et travaux"></button></div>
+          <div class="lrow"><span>Vue inclinée</span><button class="sw" data-opt="tilt" role="switch" aria-label="Vue inclinée"></button></div>
+          <div class="lrow"><span>Circulation</span><button class="sw" data-opt="trafficOn" role="switch" aria-label="Circulation"></button></div>
+          <div class="label" style="margin:12px 0 6px">Fond de carte</div>
+          <div class="seg" id="themeSeg"><button data-th="auto">Auto</button><button data-th="day">Jour</button><button data-th="night">Nuit</button></div>
+        </div>
+        <div class="mapbtns">
+          <button class="rbtn sm" id="btnLayers" title="Calques">Calques</button>
+          <button class="rbtn sm" id="btnVoice" title="Voix">Voix</button>
+          <button class="rbtn sm on" id="btnRecenter" title="Suivre">Suivre</button>
+          <button class="rbtn" id="zin">+</button>
+          <button class="rbtn" id="zout">&minus;</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= MUSIQUE ================= -->
+    <section class="screen" id="s-music">
+      <div class="card np">
+        <div class="art"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></div>
+        <div><div class="ti" data-np="title">Rien en lecture</div><div class="ar" data-np="sub">Choisis une source</div></div>
+        <div class="seekrow"><span class="num" id="tCur">0:00</span><input type="range" id="seek" min="0" max="1000" value="0"><span class="num" id="tDur">0:00</span></div>
+        <div class="ctrl">
+          <button id="btnShuffle" aria-label="Aléatoire"><svg viewBox="0 0 24 24"><path d="M16 3h5v5l-2-2-4 4-1.4-1.4 4-4zM3 6h4l9 12h5v-2l-2 2 2 2v-2h-3L9 4H3zM3 18h4l2-2.7-1.4-1.8L6 16H3z"/></svg></button>
+          <button data-mus="prev" aria-label="Précédent"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+          <button class="play" data-mus="play" aria-label="Lecture"><svg viewBox="0 0 24 24" data-playicon><path d="M8 5v14l11-7z"/></svg></button>
+          <button data-mus="next" aria-label="Suivant"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+          <button id="btnFav" aria-label="Favori"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></button>
+        </div>
+        <div class="volrow"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16 8a5 5 0 0 1 0 8"/></svg><input type="range" id="volume" min="0" max="100" value="80"></div>
+      </div>
+      <div class="card lib">
+        <div class="tabs"><button class="tab on" data-mtab="radio">Radios</button><button class="tab" data-mtab="favs">Favoris</button><button class="tab" data-mtab="files">Mes fichiers</button><button class="tab" data-mtab="apple">Apple Music</button></div>
+        <div class="libbody" id="mp-radio">
+          <div class="srow" style="margin-bottom:8px"><input id="radioSearch" class="inp" type="search" placeholder="Nom de la radio" autocomplete="off"><button class="btn" id="radioBtn">Chercher</button></div>
+          <div class="hint" id="radioMsg"></div>
+          <ul class="list" id="radioList"></ul>
+        </div>
+        <div class="libbody hidden" id="mp-favs"><ul class="list" id="favList"></ul></div>
+        <div class="libbody hidden" id="mp-apple">
+          <div class="amstate hidden" id="amState"></div>
+          <div class="srow" style="margin-bottom:8px"><input id="amSearch" class="inp" type="search" placeholder="Titre, artiste, album" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+          <ul class="sugs" id="amList"></ul>
+          <div class="slabel hidden" id="amPlLabel">Mes playlists</div>
+          <ul class="sugs" id="amPlaylists"></ul>
+        </div>
+        <div class="libbody hidden" id="mp-files">
+          <div class="srow" style="margin-bottom:8px">
+            <label class="btn primary" style="cursor:pointer">Ajouter des fichiers audio<input type="file" id="fileInput" accept="audio/*" multiple hidden></label>
+            <button class="btn" id="btnClearFiles">Vider la liste</button>
+          </div>
+          <div class="hint">Les fichiers restent sur cet appareil. Ils ne sont pas envoyés ailleurs.</div>
+          <ul class="list" id="fileList"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= REGLAGES ================= -->
+    <section class="screen" id="s-settings">
+      <div class="card"><div class="setbody">
+        <div class="sec">Position</div>
+        <div class="set"><div><div class="k">Source de position</div><div class="d">Démo : la voiture se déplace toute seule sur la carte. GPS : vraie position de l'appareil (il faut l'autoriser).</div></div>
+          <div class="ctl"><div class="seg"><button data-mode="demo" class="on">Démo</button><button data-mode="gps">GPS</button></div></div></div>
+        <div class="set"><div><div class="k">Départ de la démo</div><div class="d" id="demoStartLbl"></div></div>
+          <div class="ctl"><input id="demoStartInp" class="inp" placeholder="Ville ou adresse"><button class="btn" id="demoStartBtn">Définir</button><button class="btn" id="demoHere">Ma position</button></div></div>
+        <div class="set"><div><div class="k">Vitesse de la démo</div><div class="d">Vitesse de croisière pendant la démo.</div></div>
+          <div class="ctl"><input type="range" id="demoSpeed" min="20" max="130" step="5"><span class="num" id="demoSpeedV" style="width:64px;text-align:right"></span></div></div>
+
+        <div class="sec">Conduite</div>
+        <div class="set"><div><div class="k">Unité de vitesse</div></div>
+          <div class="ctl"><div class="seg" id="unitSeg"><button data-unit="kmh" class="on">km/h</button><button data-unit="mph">mph</button></div></div></div>
+        <div class="set"><div><div class="k">Alerte de vitesse</div><div class="d">Un bip et un affichage rouge quand tu dépasses la vitesse choisie. La limite est à saisir à la main : l'app ne la lit pas sur la route.</div></div>
+          <div class="ctl"><input id="alertLimit" class="inp" type="number" inputmode="numeric" style="width:90px"><button class="sw" id="swAlert" role="switch" aria-label="Alerte de vitesse"></button></div></div>
+        <div class="set"><div><div class="k">Voix de navigation</div><div class="d">Annonce les virages à voix haute. La musique baisse pendant l'annonce.</div></div>
+          <div class="ctl"><input type="range" id="voiceVol" min="0" max="100"><button class="btn" id="voiceTest">Tester</button><button class="sw" id="swVoice" role="switch" aria-label="Voix"></button></div></div>
+        <div class="set"><div><div class="k">Écran toujours allumé</div><div class="d">Empêche la mise en veille tant que l'app est ouverte.</div></div>
+          <div class="ctl"><button class="sw" id="swWake" role="switch" aria-label="Écran allumé"></button></div></div>
+
+        <div class="sec">Circulation et sécurité</div>
+        <div class="set"><div><div class="k">Limite de vitesse automatique</div><div class="d">Lit la vitesse maximale de la route sous la voiture (données OpenStreetMap, parfois absentes ou périmées). Elle s'affiche sur le rond de vitesse. Avec l'alerte de vitesse activée, c'est elle qui sert de limite.</div></div>
+          <div class="ctl"><button class="sw" id="swAutoLimit" role="switch" aria-label="Limite automatique"></button></div></div>
+        <div class="set"><div><div class="k">Alerte « Zone de danger »</div><div class="d">Annonce une zone de danger à l'approche (données OpenStreetMap). Comme la loi française l'impose, l'app n'indique ni position ni distance. Les données sont incomplètes : ne t'y fie pas, respecte toujours les limitations.</div></div>
+          <div class="ctl"><button class="sw" id="swDanger" role="switch" aria-label="Zones de danger"></button></div></div>
+        <div class="set"><div><div class="k">Circulation sur la carte CarDash</div><div class="d">Calque de trafic TomTom. Il faut ta propre clé gratuite (compte sur developer.tomtom.com).</div></div>
+          <div class="ctl"><input id="trafficKey" class="inp" type="password" placeholder="Clé TomTom" autocomplete="off"><button class="sw" id="swTraffic" role="switch" aria-label="Circulation"></button></div></div>
+
+        <div class="set"><div><div class="k">Trajet avec trafic</div><div class="d">Calcule les itinéraires avec la circulation en direct (TomTom) : temps réel, bouchons colorés sur le tracé, routes alternatives. Il faut la clé TomTom ci-dessus. Sans clé, l'itinéraire ignore la circulation.</div></div>
+          <div class="ctl"><button class="sw" id="swTrafficRoute" role="switch" aria-label="Trajet avec trafic"></button></div></div>
+
+        <div class="sec">Musique</div>
+        <div class="set"><div><div class="k">Jeton Apple Music</div><div class="d">Pour écouter des morceaux entiers : abonnement Apple Music et jeton développeur (compte Apple Developer payant). Le script outils/apple_music_token.py le fabrique à partir de ta clé. Sans jeton, l'onglet Apple Music donne des extraits de 30 secondes.</div></div>
+          <div class="ctl"><input id="appleToken" class="inp" type="password" placeholder="Jeton Apple Music" autocomplete="off"></div></div>
+
+        <div class="sec">Apparence</div>
+        <div class="set"><div><div class="k">Couleur de l'interface</div></div><div class="ctl dots" id="themes"></div></div>
+
+        <div class="sec">Carnet de la voiture</div>
+<div class="carnet">
+        <div class="tabs"><button class="tab on" data-ctab="fuel">Pleins</button><button class="tab" data-ctab="maint">Entretien</button><button class="tab" data-ctab="trips">Trajets</button></div>
+        <div class="databody" id="cp-fuel">
+          <div class="label">Kilomètres au compteur</div>
+          <div class="srow" style="margin:6px 0 14px"><input id="odoInput" class="inp" type="number" inputmode="numeric" min="0" placeholder="km"><button class="btn" id="odoSave">Enregistrer</button></div>
+          <div class="label">Ajouter un plein</div>
+          <div class="form" style="margin-top:6px">
+            <input id="fKm" class="inp" type="number" inputmode="numeric" placeholder="Km compteur">
+            <input id="fL" class="inp" type="number" inputmode="decimal" step="0.01" placeholder="Litres">
+            <input id="fP" class="inp" type="number" inputmode="decimal" step="0.01" placeholder="Prix total €">
+            <button class="btn primary" id="fAdd">Ajouter</button>
+          </div>
+          <div class="kpis" id="fuelKpis"></div>
+          <ul class="list" id="fuelList"></ul>
+        </div>
+        <div class="databody hidden" id="cp-maint">
+          <div id="maintList"></div>
+          <div class="srow" style="margin-top:6px"><input id="mName" class="inp" placeholder="Nouvel entretien (ex. Batterie)"><button class="btn" id="mAdd">Ajouter</button></div>
+          <div class="hint">Renseigne les intervalles d'après le carnet d'entretien de ta voiture.</div>
+        </div>
+        <div class="databody hidden" id="cp-trips">
+          <div class="label">Trajet en cours</div>
+          <div class="grid4" style="margin:8px 0 10px">
+            <div class="st"><div class="k">Distance</div><div class="val num"><span id="dist">0.0</span><small>km</small></div></div>
+            <div class="st"><div class="k">Durée</div><div class="val num" id="dur">00:00</div></div>
+            <div class="st"><div class="k">Maximum</div><div class="val num"><span id="max">0</span><small id="maxU">km/h</small></div></div>
+            <div class="st"><div class="k">Altitude</div><div class="val num"><span id="alt">--</span><small>m</small></div></div>
+          </div>
+          <button class="btn primary" id="btnEndTrip2" style="margin-bottom:14px">Terminer le trajet</button>
+          <div class="kpis" id="tripKpis"></div>
+          <ul class="list" id="tripList"></ul>
+        </div>
+      </div>
+        <div class="sec">Données</div>
+        <div class="set"><div><div class="k">Effacer toutes les données</div><div class="d">Supprime pleins, entretiens, trajets, favoris et réglages enregistrés sur cet appareil.</div></div>
+          <div class="ctl"><button class="btn danger" id="wipe">Tout effacer</button></div></div>
+        <div class="set"><div><div class="k">À propos</div><div class="d">Aperçu de CarDash. Itinéraires : OSRM. Recherche : Nominatim. Radios : radio-browser.info. Musique : catalogue Apple (iTunes Search API et MusicKit). Fond de carte : OpenFreeMap, données OpenStreetMap. Modèle 3D « 2001 Peugeot 307 Pre-Facelift Version » par Cobalt Design (sketchfab.com/psadesign), licence CC BY 4.0, couleur modifiée.</div></div></div>
+      </div></div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js"></script>
+<script src="js/core.js?v=133"></script>
+<script src="js/nav.js?v=133"></script>
+<script src="js/music.js?v=133"></script>
+<script src="js/app.js?v=133"></script>
+<script>
+/* Petits ecrans (iPhone en paysage) : on dessine l'ecran a la taille d'une tablette puis on le reduit pour qu'il tienne en entier. */
+(function () {
+  var DH = 680;
+  var last = '';
+  function fit() {
+    var w = window.innerWidth, h = window.innerHeight, b = document.body, d = document.documentElement;
+    d.classList.toggle('rot', w < h && w < 700);
+    var s = 1, cs = getComputedStyle(document.getElementById('safeProbe'));    // encoche, Dynamic Island, barre du bas
+    var ins = [parseFloat(cs.paddingTop) || 0, parseFloat(cs.paddingRight) || 0, parseFloat(cs.paddingBottom) || 0, parseFloat(cs.paddingLeft) || 0];
+    if (w > h && h < DH) {
+      s = h / DH;
+      b.style.width = (w / s) + 'px'; b.style.height = DH + 'px'; b.style.transform = 'scale(' + s + ')'; b.style.transformOrigin = '0 0';
+    } else { b.style.width = b.style.height = b.style.transform = b.style.transformOrigin = ''; }
+    b.style.boxSizing = 'border-box';
+    b.style.padding = ins.map(function (v) { return Math.round(v / s) + 'px'; }).join(' ');
+    var key = b.style.width + '|' + b.style.height;
+    if (key !== last) { last = key; setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 60); }   // les cartes se redimensionnent
+  }
+  window.addEventListener('resize', fit); window.addEventListener('orientationchange', function () { setTimeout(fit, 120); });
+  document.addEventListener('DOMContentLoaded', fit); fit();
+})();
+</script>
+</body>
+</html>

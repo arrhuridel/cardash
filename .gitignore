@@ -1,0 +1,23 @@
+# dependances et fichiers fabriques
+node_modules/
+www/
+ios/
+build/
+*.ipa
+# jamais de cles ni de secrets
+*.p8
+*.pem
+*.key
+.env
+.env.*
+# essais locaux
+apercu/_test/
+apercu/index.v2-carplay.html
+.DS_Store
+Thumbs.db
+
+# modele 3D (licence inconnue) et scripts 3D non utilises : gardes en local, pas publies
+apercu/assets/
+apercu/js/car3d.js
+apercu/js/drive.js
+apercu/js/scene.js

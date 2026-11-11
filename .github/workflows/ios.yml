@@ -1,0 +1,61 @@
+name: Construire CarDash pour iPad
+
+on:
+  workflow_dispatch:        # on le lance a la main depuis l'onglet Actions
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Installer Capacitor
+        run: npm install
+
+      - name: Preparer le site
+        run: node scripts/prepare-www.js
+
+      - name: Creer le projet iOS
+        run: |
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Reglages iOS (position, paysage, plein ecran)
+        run: |
+          PLIST=ios/App/App/Info.plist
+          B=/usr/libexec/PlistBuddy
+          $B -c "Add :NSLocationWhenInUseUsageDescription string CarDash utilise ta position pour la navigation et la vitesse." $PLIST
+          for KEY in UISupportedInterfaceOrientations "UISupportedInterfaceOrientations~ipad"; do
+            $B -c "Delete :$KEY" $PLIST || true
+            $B -c "Add :$KEY array" $PLIST
+            $B -c "Add :$KEY:0 string UIInterfaceOrientationLandscapeLeft" $PLIST
+            $B -c "Add :$KEY:1 string UIInterfaceOrientationLandscapeRight" $PLIST
+          done
+          $B -c "Add :UIStatusBarHidden bool true" $PLIST || true
+          $B -c "Add :UIViewControllerBasedStatusBarAppearance bool false" $PLIST || true
+          $B -c "Add :UIRequiresFullScreen bool true" $PLIST || true
+          cat $PLIST | head -60
+
+      - name: Compiler (sans signature : Sideloadly signera)
+        run: |
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+
+      - name: Fabriquer le fichier .ipa
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qr CarDash.ipa Payload
+          ls -lh CarDash.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CarDash-ipa
+          path: CarDash.ipa

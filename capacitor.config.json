@@ -1,0 +1,11 @@
+{
+  "appId": "com.arthur.cardash",
+  "appName": "CarDash",
+  "webDir": "www",
+  "backgroundColor": "#04060b",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#04060b",
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}

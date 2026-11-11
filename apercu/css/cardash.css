@@ -1,0 +1,287 @@
+/* CarDash : habillage final "tableau de bord de voiture".
+   Principes : noir profond, une seule couleur d'accent sobre (blanc / champagne), grandes zones tactiles (>= 56 px),
+   texte lisible d'un coup d'oeil (>= 14 px), aucun flou en direct (plus fluide sur iPad 7), aucune decoration inutile.
+   Ce fichier passe APRES style.css et reprend le dessus sur ses couches successives. */
+
+:root {
+  --bg: #050608; --card: #0d0f13; --card-2: #161920; --card-3: #1e222b;
+  --line: rgba(255,255,255,.09); --line-2: rgba(255,255,255,.16);
+  --text: #f5f6f8; --muted: #9aa0ad; --faint: #6d7380;
+  --gold: #e6d3a8; --danger: #ff6b63; --ok: #6fd39a;
+  --radius: 28px; --r-ctl: 20px;
+  --tint: #f5f6f8; --glass: #0d0f13; --blur: none;
+}
+html, body { background: var(--bg) !important; color: var(--text); }
+body::before { display: none !important; }
+body { font-size: 16px; }
+
+/* ---------- Cartes ---------- */
+html body .card { background: var(--card) !important; border: 1px solid var(--line) !important; border-radius: var(--radius); box-shadow: none !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html body .card::after { display: none !important; }
+html body .app { grid-template-columns: 104px 1fr; }
+html body .main { padding: 14px 14px 14px 0; }
+html body .screen { gap: 14px; }
+
+/* ---------- Menu de gauche ---------- */
+html body .dock { background: var(--card) !important; border: 1px solid var(--line) !important; border-radius: var(--radius); margin: 14px 14px 14px 14px; padding: 14px 0;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important; box-shadow: none !important; gap: 14px; align-items: center; }
+html body .dock .clock { text-align: center; margin-bottom: 4px; }
+html body .dock .clock .t { font-size: 24px; font-weight: 500; letter-spacing: -.01em; }
+html body .dock .clock .d { font-size: 13px; color: var(--muted); margin-top: 2px; text-transform: capitalize; }
+html body .dock .ico { width: 72px; height: 72px; border-radius: 22px; background: transparent !important; border: 1px solid transparent !important; color: var(--muted); box-shadow: none !important; }
+html body .dock .ico svg { width: 32px; height: 32px; stroke-width: 1.7; }
+html body .dock .ico.on { background: var(--text) !important; color: #0b0c0e; }
+html body .dock .ico.on svg { stroke: #0b0c0e; }
+html body .dock .mode { flex-direction: column; gap: 8px; }
+html body .dock .mode button { min-width: 72px; min-height: 44px; border-radius: 16px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  background: transparent !important; border: 1px solid var(--line) !important; box-shadow: none !important; }
+html body .dock .mode button.on { color: var(--gold); border-color: rgba(230,211,168,.45) !important; }
+
+/* ---------- Boutons, champs, interrupteurs ---------- */
+html body .btn { min-height: 56px; padding: 0 24px; border-radius: var(--r-ctl); font-size: 17px; font-weight: 500; color: var(--text); background: var(--card-3) !important;
+  border: 1px solid var(--line) !important; box-shadow: none !important; }
+html body .btn.small { min-height: 48px; padding: 0 18px; font-size: 15px; }
+html body .btn.primary { background: var(--text) !important; color: #0b0c0e !important; border-color: transparent !important; }
+html body .btn.danger { background: transparent !important; color: var(--danger) !important; border-color: rgba(255,107,99,.5) !important; }
+html body .inp { min-height: 56px; border-radius: var(--r-ctl); font-size: 18px; background: var(--card-2); border: 1px solid var(--line); color: var(--text); box-shadow: none; padding: 0 18px; }
+html body .inp::placeholder { color: var(--faint); }
+html body .seg { background: var(--card-2); border: 1px solid var(--line); border-radius: 18px; padding: 4px; box-shadow: none; }
+html body .seg button { min-height: 48px; padding: 0 18px; border-radius: 14px; font-size: 15px; color: var(--muted); background: transparent !important; box-shadow: none !important; border: 0; }
+html body .seg button.on { background: var(--text) !important; color: #0b0c0e; }
+html body .tab { min-height: 56px; border-radius: 18px; font-size: 16px; color: var(--muted); background: var(--card-2) !important; border: 1px solid var(--line) !important; box-shadow: none !important; }
+html body .tab.on { background: var(--text) !important; color: #0b0c0e; }
+html body .sw { width: 68px; height: 40px; background: var(--card-3) !important; border: 1px solid var(--line-2) !important; box-shadow: none !important; }
+html body .sw::after { width: 32px; height: 32px; top: 3px; left: 3px; background: #c4c8d0; }
+html body .sw.on { background: var(--text) !important; border-color: transparent !important; }
+html body .sw.on::after { transform: translateX(28px); background: #0b0c0e; }
+html body .chip { min-height: 48px; padding: 0 18px; border-radius: 99px; font-size: 15px; background: var(--card-3) !important; border: 1px solid var(--line) !important; box-shadow: none !important; color: var(--text); }
+input[type=range] { accent-color: #f5f6f8; height: 40px; }
+
+/* ---------- Accueil ---------- */
+#s-home { grid-template-columns: 1.45fr 1fr; grid-template-rows: 1.5fr 1fr; }
+html body #s-home .card.map { grid-area: 1 / 1 / 3 / 2; }
+html body #s-home .card.glance { grid-area: 1 / 2; }
+html body #s-home .card.music { grid-area: 2 / 2; }
+
+html body .spd { left: 18px; bottom: 18px; width: 112px; height: 112px; background: rgba(8,9,12,.92) !important; border: 1px solid var(--line-2) !important; box-shadow: none !important; }
+html body .spd b { font-size: 46px; font-weight: 500; line-height: 1; }
+html body .spd span { font-size: 12px; letter-spacing: .14em; color: var(--muted); }
+html body .spd .lim { width: 42px; height: 42px; font-size: 18px; font-weight: 700; right: -8px; top: -8px; }
+html body .wx { background: rgba(8,9,12,.92) !important; border: 1px solid var(--line-2) !important; color: var(--text); font-size: 17px; padding: 12px 20px; border-radius: 99px; box-shadow: none !important; }
+html body .zone { background: rgba(8,9,12,.92) !important; border: 1px solid rgba(255,107,99,.6) !important; color: #ffb0aa; font-size: 16px; padding: 12px 20px; border-radius: 99px; box-shadow: none !important; }
+html body .fab, html body #s-home .fab { left: 146px; bottom: 18px; min-height: 64px; padding: 0 30px; border-radius: 99px; font-size: 20px; font-weight: 600; background: var(--text) !important; color: #0b0c0e !important; border: 0 !important; box-shadow: none !important; }
+
+html body #s-home .glance { background: var(--card) !important; }
+html body #s-home .glance .gt { font-size: clamp(64px, 29cqw, 176px); font-weight: 300; }
+html body #s-home .glance .gd { font-size: clamp(13px, 3.6cqw, 19px); color: var(--muted); letter-spacing: .26em; }
+html body #s-home .glance .banner .turn { background: var(--text) !important; border: 0 !important; }
+html body #s-home .glance .banner .turn svg { stroke: #0b0c0e; }
+html body #s-home .glance .banner .big { font-weight: 300; }
+html body #s-home .glance .banner .sub { color: var(--text); font-size: clamp(15px, 4.8cqw, 22px); }
+html body #s-home .glance .meta { border-top: 1px solid var(--line-2); }
+html body #s-home .glance .meta b { font-size: clamp(20px, 6.2cqw, 30px); font-weight: 400; }
+html body #s-home .glance .meta span { font-size: clamp(10px, 2.6cqw, 12px); color: var(--muted); }
+
+html body #s-home .card.music { padding: 18px 24px; gap: 12px; justify-content: center; }
+html body #s-home .music .art { width: 84px; height: 84px; border-radius: 22px; background: var(--card-3) !important; border: 1px solid var(--line) !important; }
+html body #s-home .music .art svg { width: 34px; height: 34px; }
+html body #s-home .music .ti { font-size: 24px; font-weight: 600; }
+html body #s-home .music .ar { font-size: 15px; color: var(--muted); opacity: 1; }
+html body .mprog { height: 4px; background: var(--card-3); }
+html body .mprog i { background: var(--text); }
+html body #s-home .music .ctrl { gap: 22px; justify-content: center; }
+html body #s-home .music .ctrl button { width: 64px; height: 64px; background: transparent !important; border: 1px solid var(--line) !important; color: var(--text); box-shadow: none !important; }
+html body #s-home .music .ctrl .play { width: 78px; height: 78px; background: var(--text) !important; color: #0b0c0e; border: 0 !important; }
+html body #s-home .music .ctrl svg { width: 28px; height: 28px; }
+
+/* ---------- Carte ---------- */
+html body .mapbtns { gap: 12px; right: 16px; top: 16px; }
+html body .rbtn { min-width: 64px; min-height: 64px; border-radius: 20px; font-size: 14px; font-weight: 500; letter-spacing: .02em; color: var(--text) !important;
+  background: rgba(8,9,12,.92) !important; border: 1px solid var(--line-2) !important; box-shadow: none !important; }
+html body .rbtn.on { background: var(--text) !important; color: #0b0c0e !important; }
+html body #zin, html body #zout { font-size: 30px; font-weight: 300; }
+html body .search { left: 50%; right: auto; transform: translateX(-50%); width: min(620px, calc(100% - 300px)); bottom: 18px; }
+html body .pill { min-height: 64px; border-radius: 99px; background: rgba(8,9,12,.94) !important; border: 1px solid var(--line-2) !important; box-shadow: none !important; padding: 0 20px; }
+html body .pill .inp { font-size: 21px; min-height: 60px; background: transparent !important; border: 0 !important; }
+html body .pill .mag { width: 26px; height: 26px; }
+html body .panel { background: rgba(8,9,12,.96) !important; border: 1px solid var(--line-2) !important; border-radius: 26px; box-shadow: none !important; }
+html body .sug { min-height: 68px; border-radius: 20px; padding: 10px 14px; }
+html body .sug .tx b, html body .sug .t1 { font-size: 18px; }
+html body .sug .tx span, html body .sug .t2 { font-size: 14px; color: var(--muted); }
+html body #routePanel .rs b { font-size: 34px; font-weight: 500; }
+html body #routePanel .rs span { font-size: 17px; color: var(--muted); }
+html body #routePanel .rd { font-size: 20px; }
+html body .go { min-height: 64px; font-size: 22px; border-radius: 99px; }
+html body .lpanel { background: rgba(8,9,12,.96) !important; border: 1px solid var(--line-2) !important; border-radius: 26px; box-shadow: none !important; }
+html body .lrow { min-height: 56px; font-size: 17px; }
+
+html body .banner { background: rgba(8,9,12,.95) !important; border: 1px solid var(--line-2) !important; border-radius: 28px; box-shadow: none !important; padding: 14px 22px 14px 14px; }
+html body .banner .turn { width: 84px; height: 84px; border-radius: 22px; background: var(--text) !important; border: 0 !important; }
+html body .banner .turn svg { width: 46px; height: 46px; stroke: #0b0c0e; }
+html body .banner .big { font-size: 40px; font-weight: 400; }
+html body .banner .sub { font-size: 19px; color: var(--text); }
+html body .banner .then { font-size: 15px; color: var(--muted); }
+html body .eta { background: rgba(8,9,12,.95) !important; border: 1px solid var(--line-2) !important; border-radius: 99px; box-shadow: none !important; padding: 12px 14px 12px 32px; gap: 34px; bottom: 18px; }
+html body .eta b { font-size: 30px; font-weight: 400; }
+html body .eta span { font-size: 12px; color: var(--muted); letter-spacing: .16em; }
+html body .eta .btn { min-height: 60px; }
+html body .fastbar { background: rgba(8,9,12,.96) !important; border: 1px solid var(--gold) !important; border-radius: 22px; font-size: 17px; }
+
+/* ---------- Musique ---------- */
+html body #s-music .np { padding: 28px 28px 24px; gap: 14px; }
+html body #s-music .np .art { background: var(--card-3) !important; border: 1px solid var(--line) !important; border-radius: 32px; box-shadow: none !important; }
+html body #s-music .np .ti { font-size: 28px; font-weight: 600; }
+html body #s-music .np .ar { font-size: 17px; color: var(--muted); }
+html body .seekrow { gap: 14px; font-size: 15px; color: var(--muted); }
+html body #s-music .ctrl { gap: 18px; }
+html body #s-music .ctrl button { width: 68px; height: 68px; border-radius: 50%; background: transparent !important; border: 1px solid var(--line) !important; color: var(--text); box-shadow: none !important; }
+html body #s-music .ctrl .play { width: 92px; height: 92px; background: var(--text) !important; color: #0b0c0e; border: 0 !important; }
+html body #s-music .ctrl svg { width: 30px; height: 30px; }
+html body #s-music .ctrl .on { color: var(--gold); border-color: rgba(230,211,168,.5) !important; }
+html body .volrow svg { width: 28px; height: 28px; }
+html body #s-music .lib { padding: 16px; }
+html body .list li, html body .sugs li { min-height: 68px; }
+html body .list li b, html body .list .n { font-size: 19px; }
+html body .list li span, html body .list .s { font-size: 14px; color: var(--muted); }
+html body .hint { font-size: 14px; color: var(--muted); }
+
+/* ---------- Reglages ---------- */
+html body .setbody { padding: 10px 26px 26px; }
+html body .sec { font-size: 13px; letter-spacing: .2em; color: var(--gold); padding: 26px 2px 8px; }
+html body .set { min-height: 76px; padding: 14px 2px; border-bottom: 1px solid var(--line); }
+html body .set .k { font-size: 18px; font-weight: 500; }
+html body .set .d { font-size: 14px; color: var(--muted); max-width: 520px; line-height: 1.45; }
+html body .set .ctl .inp { width: 190px; }
+html body .dots .dot { width: 48px; height: 48px; }
+
+/* ---------- Divers ---------- */
+html body .status { font-size: 12px; letter-spacing: .24em; color: var(--faint); }
+html body .toast { background: var(--card-3) !important; border: 1px solid var(--line-2) !important; border-radius: 22px; font-size: 17px; box-shadow: none !important; }
+.maplibregl-ctrl-attrib { font-size: 11px !important; background: rgba(8,9,12,.6) !important; }
+.maplibregl-ctrl-attrib a { color: var(--muted) !important; }
+
+/* icones sur fond blanc : sombres */
+html body .ctrl .play svg, html body .ctrl .play svg * { fill: #0b0c0e !important; stroke: #0b0c0e !important; }
+html body .btn.primary svg, html body .fab svg { stroke: #0b0c0e; }
+
+/* meteo en haut a gauche de la carte (ne gene plus la vitesse) */
+html body .wx, html body #s-home .wx { top: 18px !important; left: 18px !important; bottom: auto !important; right: auto !important; }
+html body .spd { overflow: visible; }
+
+/* ecran carte : meteo et zone de danger en bas a gauche, au-dessus de la vitesse (le haut est reserve a la consigne) */
+html body #s-map .wx { top: auto !important; bottom: 146px !important; left: 18px !important; }
+html body #s-map .zone { top: auto !important; bottom: 200px !important; left: 18px !important; transform: none !important; right: auto !important; }
+html body .eta b, html body .meta b { white-space: nowrap; }
+html body .eta > div { white-space: nowrap; }
+
+/* =====================================================================
+   LIQUID GLASS CLEAR : verre clair et translucide, reflets fins sur les bords, fond lumineux doux.
+   Le flou en direct n'est utilise que sur le fond fixe (cartes, menu). Par-dessus la carte : verre sans flou, pour rester fluide.
+   ===================================================================== */
+:root {
+  --glass-fill: linear-gradient(155deg, rgba(255,255,255,.17) 0%, rgba(255,255,255,.07) 48%, rgba(255,255,255,.10) 100%);
+  --glass-edge: inset 0 1.5px 0 rgba(255,255,255,.42), inset 0 0 0 1px rgba(255,255,255,.12), inset 0 -14px 28px rgba(255,255,255,.035), 0 14px 40px rgba(0,0,0,.38);
+  --over-fill: linear-gradient(155deg, rgba(40,48,70,.66), rgba(14,18,30,.62));
+  --over-edge: inset 0 1.5px 0 rgba(255,255,255,.38), inset 0 0 0 1px rgba(255,255,255,.14), 0 10px 28px rgba(0,0,0,.35);
+}
+html, body { background: #04060b !important; }
+body::before { display: block !important; content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(55% 48% at 12% 8%, rgba(70,115,255,.42), transparent 62%),
+    radial-gradient(48% 44% at 92% 14%, rgba(160,90,255,.30), transparent 62%),
+    radial-gradient(60% 50% at 78% 104%, rgba(0,185,210,.34), transparent 62%),
+    radial-gradient(40% 40% at 30% 96%, rgba(255,140,120,.16), transparent 60%),
+    #04060b; }
+
+/* cartes et menu : verre clair, flou doux sur fond fixe */
+html body .card, html body .dock {
+  background: var(--glass-fill) !important; border: 1px solid rgba(255,255,255,.10) !important; box-shadow: var(--glass-edge) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(1.6) !important; backdrop-filter: blur(26px) saturate(1.6) !important; }
+/* la carte (la map) n'a pas besoin de flou : elle remplit toute la carte */
+html body #s-home .card.map, html body #s-map > .card { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html body #s-home .glance, html body #s-home .card.music { background: var(--glass-fill) !important; }
+
+/* menu */
+html body .dock .ico { background: transparent !important; color: rgba(255,255,255,.72); }
+html body .dock .ico.on { background: rgba(255,255,255,.24) !important; color: #fff; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), inset 0 0 0 1px rgba(255,255,255,.2), 0 6px 18px rgba(0,0,0,.25) !important; }
+html body .dock .ico.on svg { stroke: #fff; }
+html body .dock .mode button { background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.14) !important; color: rgba(255,255,255,.7); }
+html body .dock .mode button.on { background: rgba(255,255,255,.2) !important; color: #fff; border-color: rgba(255,255,255,.34) !important; }
+
+/* boutons, champs, onglets */
+html body .btn, html body .chip, html body .tab { background: linear-gradient(155deg, rgba(255,255,255,.18), rgba(255,255,255,.07)) !important; border: 1px solid rgba(255,255,255,.14) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.34), 0 6px 18px rgba(0,0,0,.22) !important; color: #fff; }
+html body .btn.primary { background: linear-gradient(170deg, #ffffff, #dfe6f5) !important; color: #0b0f1a !important; border: 0 !important; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.9), 0 8px 24px rgba(0,0,0,.3) !important; }
+html body .btn.danger { background: rgba(255,107,99,.12) !important; color: #ff8d86 !important; border: 1px solid rgba(255,107,99,.5) !important; }
+html body .tab.on, html body .seg button.on { background: rgba(255,255,255,.28) !important; color: #fff !important; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), 0 4px 14px rgba(0,0,0,.25) !important; }
+html body .seg { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); box-shadow: inset 0 1px 3px rgba(0,0,0,.25); }
+html body .seg button { color: rgba(255,255,255,.7); }
+html body .inp { background: rgba(0,0,0,.28) !important; border: 1px solid rgba(255,255,255,.16) !important; box-shadow: inset 0 1px 4px rgba(0,0,0,.35) !important; color: #fff; }
+html body .sw { background: rgba(255,255,255,.12) !important; border: 1px solid rgba(255,255,255,.22) !important; box-shadow: inset 0 1px 3px rgba(0,0,0,.3) !important; }
+html body .sw::after { background: linear-gradient(#fff, #e3e8f4); box-shadow: 0 3px 8px rgba(0,0,0,.35); }
+html body .sw.on { background: linear-gradient(160deg, #6fe39a, #34c48a) !important; border-color: transparent !important; }
+html body .sw.on::after { background: #fff; }
+
+/* par-dessus la carte : verre sombre-clair, sans flou en direct */
+html body .spd, html body .wx, html body .zone, html body .rbtn, html body .pill, html body .panel, html body .lpanel, html body .banner, html body .eta, html body .fastbar, html body .toast {
+  background: var(--over-fill) !important; border: 1px solid rgba(255,255,255,.14) !important; box-shadow: var(--over-edge) !important; color: #fff; }
+html body .rbtn.on { background: rgba(255,255,255,.9) !important; color: #0b0f1a !important; }
+html body .fab, html body #s-home .fab { background: linear-gradient(170deg, #ffffff, #dfe6f5) !important; color: #0b0f1a !important; box-shadow: inset 0 1.5px 0 #fff, 0 10px 28px rgba(0,0,0,.4) !important; }
+html body .banner .turn { background: linear-gradient(170deg, #ffffff, #dfe6f5) !important; }
+html body .zone { border-color: rgba(255,120,110,.6) !important; }
+
+/* musique : verre pour la pochette et les commandes */
+html body #s-home .music .art, html body #s-music .np .art, html body #s-home .glance .banner .turn { box-shadow: var(--glass-edge) !important; }
+html body #s-home .music .art, html body #s-music .np .art { background: var(--glass-fill) !important; border: 1px solid rgba(255,255,255,.16) !important; }
+html body #s-home .music .ctrl button, html body #s-music .ctrl button { background: linear-gradient(155deg, rgba(255,255,255,.18), rgba(255,255,255,.06)) !important; border: 1px solid rgba(255,255,255,.16) !important; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.36), 0 6px 18px rgba(0,0,0,.25) !important; }
+html body #s-home .music .ctrl .play, html body #s-music .ctrl .play { background: linear-gradient(170deg, #ffffff, #dfe6f5) !important; border: 0 !important; box-shadow: inset 0 1.5px 0 #fff, 0 10px 26px rgba(0,0,0,.4) !important; }
+html body .mprog, html body #s-music input[type=range] { background: rgba(255,255,255,.14); }
+html body .list li, html body .sugs li { border-radius: 18px; }
+html body .sug:active, html body .list li:active { background: rgba(255,255,255,.12); }
+html body .sec { color: rgba(255,255,255,.62); }
+html body .set { border-bottom-color: rgba(255,255,255,.10); }
+html body #s-home .glance .gd { color: rgba(255,255,255,.62); }
+
+/* listes : texte plus grand, lignes plus hautes (doigt dans la voiture) */
+html body .li { min-height: 72px; padding: 12px 10px; border-radius: 18px; border-bottom-color: rgba(255,255,255,.08); }
+html body .li .t1, html body .sug .t1 { font-size: 19px; font-weight: 500; }
+html body .li .t2, html body .sug .t2 { font-size: 14px; color: rgba(255,255,255,.62); margin-top: 3px; }
+html body .li.on, html body .sug.hl { background: rgba(255,255,255,.14); }
+html body .amstate, html body .empty { font-size: 15px; color: rgba(255,255,255,.7); }
+
+/* =====================================================================
+   ANIMATIONS facon iOS : uniquement transform et opacity (le plus leger pour le GPU), courbe "ressort" douce.
+   ===================================================================== */
+:root { --spring: cubic-bezier(.2, .9, .25, 1); --bounce: cubic-bezier(.34, 1.45, .64, 1); }
+@keyframes scrIn { from { opacity: 0; transform: translate3d(0, 14px, 0) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes cardIn { from { opacity: 0; transform: translate3d(0, 22px, 0) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes popIn { from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes fadeUp { from { opacity: 0; transform: translate3d(0, 8px, 0); } to { opacity: 1; transform: none; } }
+
+/* changement d'ecran : les cartes arrivent l'une apres l'autre */
+html body .screen.active > .card, html body .screen.active > .card ~ .card { animation: cardIn .5s var(--spring) both; }
+html body .screen.active > :nth-child(2) { animation-delay: .05s; }
+html body .screen.active > :nth-child(3) { animation-delay: .1s; }
+
+/* elements qui apparaissent (consigne, panneaux, durée...) */
+html body .banner:not(.hidden), html body .eta:not(.hidden), html body .meta:not(.hidden), html body .panel:not(.hidden), html body .lpanel:not(.hidden),
+html body .fastbar:not(.hidden), html body .demopanel:not(.hidden), html body .zone:not(.hidden), html body .wx:not(.hidden) { animation: popIn .42s var(--spring) both; }
+html body .libbody:not(.hidden) { animation: fadeUp .32s var(--spring) both; }
+html body .toast { animation: popIn .35s var(--spring) both; }
+
+/* toucher : le bouton s'enfonce puis revient avec un petit rebond */
+html body .ico, html body .btn, html body .rbtn, html body .tab, html body .chip, html body .seg button, html body .ctrl button, html body .fab, html body .mode button, html body .sug, html body .li {
+  transition: transform .45s var(--bounce), background-color .25s ease, opacity .25s ease, color .25s ease; }
+html body .ico:active, html body .btn:active, html body .rbtn:active, html body .tab:active, html body .chip:active, html body .seg button:active, html body .ctrl button:active,
+html body .fab:active, html body .mode button:active { transform: scale(.92); transition-duration: .1s; }
+html body .sug:active, html body .li:active { transform: scale(.985); transition-duration: .1s; }
+html body .sw::after { transition: transform .4s var(--bounce), background .25s ease; }
+
+/* l'icone selectionnee du menu glisse en douceur */
+html body .dock .ico { transition: transform .45s var(--bounce), background-color .3s ease, color .3s ease, box-shadow .3s ease; }
+html body .dock .ico.on { transform: scale(1.04); }
+
+@media (prefers-reduced-motion: reduce) {
+  html body *, html body *::before, html body *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
+}
