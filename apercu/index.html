@@ -11,8 +11,8 @@
 <meta name="format-detection" content="telephone=no">
 <title>CarDash</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css">
-<link rel="stylesheet" href="css/style.css?v=153">
-<link rel="stylesheet" href="css/cardash.css?v=153">
+<link rel="stylesheet" href="css/style.css?v=160">
+<link rel="stylesheet" href="css/cardash.css?v=160">
 </head>
 <body>
 <div id="safeProbe" style="position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)"></div>
@@ -43,7 +43,7 @@
         <button class="fab" data-go="map">Destination</button>
       </div>
 
-      <div class="card music">
+      <div class="card music" data-go="music" style="cursor:pointer">
         <div class="now" data-go="music" style="cursor:pointer">
           <div class="art"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></div>
           <div><div class="ti" data-np="title">Rien en lecture</div><div class="ar" data-np="sub">Choisis une source</div></div>
@@ -266,10 +266,10 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js"></script>
-<script src="js/core.js?v=153"></script>
-<script src="js/nav.js?v=153"></script>
-<script src="js/music.js?v=153"></script>
-<script src="js/app.js?v=153"></script>
+<script src="js/core.js?v=160"></script>
+<script src="js/nav.js?v=160"></script>
+<script src="js/music.js?v=160"></script>
+<script src="js/app.js?v=160"></script>
 <script>
 /* Petits ecrans (iPhone en paysage) : on dessine l'ecran a la taille d'une tablette puis on le reduit pour qu'il tienne en entier. */
 (function () {

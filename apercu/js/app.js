@@ -55,6 +55,8 @@
   document.addEventListener('touchstart', function () {}, { passive: true });   // necessaire sur iOS pour que :active reagisse
   document.addEventListener('click', function (e) {
     var t = e.target.closest ? e.target.closest('[data-go]') : null;
+    var btn = e.target.closest ? e.target.closest('button, input') : null;
+    if (btn && !btn.hasAttribute('data-go')) return;      // les boutons de la carte (precedent, lecture, suivant) gardent leur role
     if (t) go(t.dataset.go);
   });
 
