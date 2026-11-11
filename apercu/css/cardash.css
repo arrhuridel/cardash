@@ -356,3 +356,7 @@ html body #s-home .glance .banner > div:last-child { width: 100%; text-align: ce
 html body #s-home .glance .meta { left: 30px; right: 30px; bottom: 26px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.16); }
 /* pochette : meme regle avec la priorite des regles de l'accueil et de la page musique */
 html body #s-home .music .art.img, html body #s-music .np .art.img { background-image: var(--art) !important; background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; }
+
+/* barre d'arrivee, bandeau "plus rapide" et message : centres sans transform (l'animation d'apparition utilisait transform et les decalait a droite) */
+html body .eta, html body .fastbar { left: 0 !important; right: 0 !important; margin-left: auto !important; margin-right: auto !important; width: max-content !important; max-width: calc(100% - 300px); transform: none !important; }
+html body .toast { left: 0 !important; right: 0 !important; margin-left: auto !important; margin-right: auto !important; width: max-content; max-width: 80vw; transform: none !important; }
