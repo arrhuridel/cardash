@@ -9,6 +9,7 @@
     screen = name;
     CD.qsa('.screen').forEach(function (s) { s.classList.toggle('active', s.id === 's-' + name); });
     CD.qsa('.dock [data-go]').forEach(function (b) { b.classList.toggle('on', b.dataset.go === name); });
+    movePill(true);
     CD.nav.onShow(name);
     if (name === 'music') CD.music.onShow();
     if (name === 'settings') { renderSettings(); renderCar(); }
@@ -16,6 +17,42 @@
     CD.store.set('screen', name);
   }
   CD.go = go;
+
+  // ---- Pastille de verre du menu : elle glisse d'une icone a l'autre en s'etirant (effet liquide) ----
+  var pill = null, pillPos = null, pillAnim = null;
+  function movePill(animated) {
+    var dock = document.querySelector('.dock'), btn = document.querySelector('.dock [data-go].on');
+    if (!dock || !btn) return;
+    if (!pill) { pill = document.createElement('div'); pill.className = 'navpill'; pill.setAttribute('aria-hidden', 'true'); dock.insertBefore(pill, dock.firstChild); }
+    var x = btn.offsetLeft, y = btn.offsetTop, w = btn.offsetWidth, h = btn.offsetHeight;
+    pill.style.width = w + 'px'; pill.style.height = h + 'px';
+    var to = 'translate3d(' + x + 'px,' + y + 'px,0)';
+    if (pillAnim) { try { pillAnim.cancel(); } catch (e) {} pillAnim = null; }
+    if (animated && pillPos && pill.animate && (pillPos.x !== x || pillPos.y !== y)) {
+      var mx = (pillPos.x + x) / 2, my = (pillPos.y + y) / 2, vert = Math.abs(y - pillPos.y) >= Math.abs(x - pillPos.x);
+      var far = Math.min(1, (Math.abs(y - pillPos.y) + Math.abs(x - pillPos.x)) / 260), st = 1 + 0.42 * far, sq = 1 - 0.16 * far;
+      pillAnim = pill.animate([
+        { transform: 'translate3d(' + pillPos.x + 'px,' + pillPos.y + 'px,0) scale(1,1)' },
+        { transform: 'translate3d(' + mx + 'px,' + my + 'px,0) scale(' + (vert ? sq : st) + ',' + (vert ? st : sq) + ')', offset: 0.42 },
+        { transform: to + ' scale(' + (vert ? 1.07 : 0.94) + ',' + (vert ? 0.94 : 1.07) + ')', offset: 0.78 },
+        { transform: to + ' scale(1,1)' }
+      ], { duration: 520, easing: 'cubic-bezier(.3,.75,.25,1)' });
+    }
+    pill.style.transform = to; pillPos = { x: x, y: y };
+  }
+  window.addEventListener('resize', function () { setTimeout(function () { movePill(false); }, 80); });
+  setTimeout(function () { movePill(false); }, 0); setTimeout(function () { movePill(false); }, 400);
+
+  // ---- Retour tactile immediat : le bouton reagit des que le doigt le touche (sans attendre le clic) ----
+  var PRESS = 'button, .btn, .sug, .li, .chip, .tab, [data-go], .now', pressed = null, pressAt = 0;
+  function release() { var p = pressed; pressed = null; if (p) setTimeout(function () { p.classList.remove('pr'); }, Math.max(0, 110 - (Date.now() - pressAt))); }
+  document.addEventListener('pointerdown', function (e) {
+    var t = e.target.closest ? e.target.closest(PRESS) : null;
+    if (pressed && pressed !== t) pressed.classList.remove('pr');
+    if (t) { pressed = t; pressAt = Date.now(); t.classList.add('pr'); }
+  }, { passive: true });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { document.addEventListener(ev, release, { passive: true }); });
+  document.addEventListener('touchstart', function () {}, { passive: true });   // necessaire sur iOS pour que :active reagisse
   document.addEventListener('click', function (e) {
     var t = e.target.closest ? e.target.closest('[data-go]') : null;
     if (t) go(t.dataset.go);
@@ -47,7 +84,7 @@
     if (over && Date.now() - lastBeep > 8000) { lastBeep = Date.now(); CD.beep(); }
   }
   function renderUnits() {
-    CD.qsa('[data-unit]').forEach(function (e) { e.textContent = CD.unitLabel(); });
+    CD.qsa('span[data-unit]').forEach(function (e) { e.textContent = CD.unitLabel(); });
     $('maxU').textContent = CD.unitLabel().toLowerCase();
 
   }

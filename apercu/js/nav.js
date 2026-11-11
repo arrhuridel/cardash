@@ -168,10 +168,11 @@
     if (!R.on) { updMarker('mini'); updMarker('main'); }     // sinon c'est la boucle d'animation qui deplace la voiture et la camera
   }
   // Animation fluide : a chaque image on rapproche la position affichee de la vraie position (10 Hz en demo, 1 Hz en GPS)
-  var R = { on: false, lat: null, lon: null, hdg: 0, zoom: null, last: 0 };
+  var R = { on: false, lat: null, lon: null, hdg: 0, zoom: null, last: 0, a: {}, slow: 0, n: 0, skip: false, hgt: {} };
   function hdgDelta(a, b) { return ((((b - a) % 360) + 540) % 360) - 180; }   // plus court chemin entre deux caps, meme avec des angles negatifs ou tres grands
   function animFrame(ts) {
-    requestAnimationFrame(animFrame);
+    window.addEventListener('resize', function () { R.hgt = {}; R.a = {}; });
+  requestAnimationFrame(animFrame);
     var dt = Math.min(0.1, (ts - R.last) / 1000); R.last = ts;
     var key = miniVisible ? 'mini' : (mainVisible ? 'main' : null), m = key && maps[key];
     if (document.hidden || !m || S.lat == null) { R.on = false; return; }
@@ -184,10 +185,19 @@
     var kp = 1 - Math.exp(-dt * (S.mode === 'gps' ? 6 : 9)), kh = 1 - Math.exp(-dt * 6), kz = 1 - Math.exp(-dt * 2.5);
     R.lat += (tl - R.lat) * kp; R.lon += (tn - R.lon) * kp; R.hdg += hdgDelta(R.hdg, S.heading) * kh;      // angle continu (sans retour a 0) : evite le tour complet de la fleche
     R.on = true;
+    // appareil lent (iPad 7) : si les images mettent trop de temps, la carte n'est mise a jour qu'une image sur deux
+    R.slow += ((dt > 0.024 ? 1 : 0) - R.slow) * 0.02; R.n++;
+    if (R.slow > 0.5 && (R.n & 1)) return;
+    // rien n'a bouge depuis la derniere image : on ne redessine pas la carte
+    var A = R.a, pitchT = (ST.tilt && (guiding || key === 'main')) ? 55 : 0;
+    var ztT = key === 'mini' ? (guiding ? 16.3 - Math.min(1.2, S.speed / 70) : 15.3) : (guiding ? 17.3 - Math.min(1.6, S.speed / 60) : null);
+    if (A.key === key && Math.abs(A.lat - R.lat) < 2e-7 && Math.abs(A.lon - R.lon) < 2e-7 && Math.abs(A.hdg - R.hdg) < 0.03 && A.pitch === pitchT &&
+        (ztT == null || (R.zoom != null && Math.abs(ztT - R.zoom) < 0.002)) && A.follow === follow) return;
+    A.key = key; A.lat = R.lat; A.lon = R.lon; A.hdg = R.hdg; A.pitch = pitchT; A.follow = follow;
     var mk = markers[key]; if (mk) { mk.setLngLat([R.lon, R.lat]); mk.setRotation(R.hdg); }
     if (key === 'main' && !follow) return;
     var zt = key === 'mini' ? (guiding ? 16.3 - Math.min(1.2, S.speed / 70) : 15.3) : (guiding ? 17.3 - Math.min(1.6, S.speed / 60) : null);
-    var o = { center: [R.lon, R.lat], bearing: R.hdg, duration: 0, offset: [0, m.getContainer().clientHeight * 0.2], pitch: (ST.tilt && (guiding || key === 'main')) ? 55 : 0 };
+    var o = { center: [R.lon, R.lat], bearing: R.hdg, duration: 0, offset: [0, (R.hgt[key] || (R.hgt[key] = m.getContainer().clientHeight)) * 0.2], pitch: pitchT };
     if (zt != null) { R.zoom = R.zoom == null ? zt : R.zoom + (zt - R.zoom) * kz; o.zoom = R.zoom; }
     m.easeTo(o);
   }
@@ -1063,7 +1073,7 @@
     _testCam: function (lat, lon) { cams.push({ id: 'test' + Date.now(), lat: lat, lon: lon }); },
     isGuiding: function () { return guiding; },
     onShow: function (name) {
-      mainVisible = name === 'map'; miniVisible = name === 'home';
+      mainVisible = name === 'map'; miniVisible = name === 'home'; R.hgt = {}; R.a = {};
       if (name === 'home') { ensureMap('mini'); setTimeout(function () { maps.mini.resize(); camera('mini', 0); }, 60); }
       if (name === 'map') {
         var m = ensureMap('main');

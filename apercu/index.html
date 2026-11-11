@@ -11,8 +11,8 @@
 <meta name="format-detection" content="telephone=no">
 <title>CarDash</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css">
-<link rel="stylesheet" href="css/style.css?v=133">
-<link rel="stylesheet" href="css/cardash.css?v=133">
+<link rel="stylesheet" href="css/style.css?v=143">
+<link rel="stylesheet" href="css/cardash.css?v=143">
 </head>
 <body>
 <div id="safeProbe" style="position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)"></div>
@@ -186,11 +186,11 @@
     <section class="screen" id="s-settings">
       <div class="card"><div class="setbody">
         <div class="sec">Position</div>
-        <div class="set"><div><div class="k">Source de position</div><div class="d">Démo : la voiture se déplace toute seule sur la carte. GPS : vraie position de l'appareil (il faut l'autoriser).</div></div>
+        <div class="set demo-only"><div><div class="k">Source de position</div><div class="d">Démo : la voiture se déplace toute seule sur la carte. GPS : vraie position de l'appareil (il faut l'autoriser).</div></div>
           <div class="ctl"><div class="seg"><button data-mode="demo" class="on">Démo</button><button data-mode="gps">GPS</button></div></div></div>
-        <div class="set"><div><div class="k">Départ de la démo</div><div class="d" id="demoStartLbl"></div></div>
+        <div class="set demo-only"><div><div class="k">Départ de la démo</div><div class="d" id="demoStartLbl"></div></div>
           <div class="ctl"><input id="demoStartInp" class="inp" placeholder="Ville ou adresse"><button class="btn" id="demoStartBtn">Définir</button><button class="btn" id="demoHere">Ma position</button></div></div>
-        <div class="set"><div><div class="k">Vitesse de la démo</div><div class="d">Vitesse de croisière pendant la démo.</div></div>
+        <div class="set demo-only"><div><div class="k">Vitesse de la démo</div><div class="d">Vitesse de croisière pendant la démo.</div></div>
           <div class="ctl"><input type="range" id="demoSpeed" min="20" max="130" step="5"><span class="num" id="demoSpeedV" style="width:64px;text-align:right"></span></div></div>
 
         <div class="sec">Conduite</div>
@@ -266,10 +266,10 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js"></script>
-<script src="js/core.js?v=133"></script>
-<script src="js/nav.js?v=133"></script>
-<script src="js/music.js?v=133"></script>
-<script src="js/app.js?v=133"></script>
+<script src="js/core.js?v=143"></script>
+<script src="js/nav.js?v=143"></script>
+<script src="js/music.js?v=143"></script>
+<script src="js/app.js?v=143"></script>
 <script>
 /* Petits ecrans (iPhone en paysage) : on dessine l'ecran a la taille d'une tablette puis on le reduit pour qu'il tienne en entier. */
 (function () {

@@ -285,3 +285,48 @@ html body .dock .ico.on { transform: scale(1.04); }
 @media (prefers-reduced-motion: reduce) {
   html body *, html body *::before, html body *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
 }
+
+/* =====================================================================
+   FLUIDITE iPad 7 : verre SANS flou en direct, pastille de menu qui glisse, retour tactile immediat.
+   ===================================================================== */
+html body :not(#_nb), html body :not(#_nb)::before, html body :not(#_nb)::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html body .card, html body .dock { background: linear-gradient(155deg, rgba(255,255,255,.15) 0%, rgba(255,255,255,.06) 46%, rgba(255,255,255,.09) 100%), rgba(10,13,22,.55) !important; }
+html body #s-home .glance, html body #s-home .card.music { background: linear-gradient(155deg, rgba(255,255,255,.15) 0%, rgba(255,255,255,.06) 46%, rgba(255,255,255,.09) 100%), rgba(10,13,22,.55) !important; }
+
+/* --- menu : la pastille de verre porte la selection, les icones restent nues --- */
+html body .dock { position: relative; }
+html body .navpill { position: absolute; left: 0; top: 0; z-index: 0; border-radius: 22px; pointer-events: none; will-change: transform; transform-origin: 50% 50%;
+  background: linear-gradient(160deg, rgba(255,255,255,.42), rgba(255,255,255,.16)); border: 1px solid rgba(255,255,255,.34);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.7), inset 0 -8px 16px rgba(255,255,255,.08), 0 8px 22px rgba(0,0,0,.3); }
+html body .dock .ico { position: relative; z-index: 1; background: transparent !important; border-color: transparent !important; box-shadow: none !important;
+  transition: transform .5s var(--bounce), color .25s ease, opacity .25s ease; }
+html body .dock .ico.on { background: transparent !important; box-shadow: none !important; color: #fff; transform: scale(1.06); }
+html body .dock .ico svg { transition: stroke .25s ease; }
+html body .dock .clock, html body .dock .mode, html body .dock .spacer { position: relative; z-index: 1; }
+
+/* --- changement d'ecran : une seule couche animee, courte --- */
+@keyframes scrGlass { from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.988); } to { opacity: 1; transform: none; } }
+html body .screen.active { animation: scrGlass .34s var(--spring) both; }
+html body .screen.active > .card, html body .screen.active > .card ~ .card { animation: cardIn .46s var(--spring) both; }
+html body .screen.active > :nth-child(2) { animation-delay: .04s; }
+html body .screen.active > :nth-child(3) { animation-delay: .08s; }
+/* la grande carte (GPS) ne bouge pas : seulement un fondu, pour ne pas faire travailler la carte */
+html body #s-map.active { animation: none; }
+html body #s-map.active > .card { animation: fadeUp .26s ease-out both; }
+
+/* --- retour tactile immediat --- */
+html body .pr { transform: scale(.93) !important; opacity: .82; transition: transform .07s ease-out, opacity .07s ease-out !important; }
+html body .sug.pr, html body .li.pr, html body .now.pr { transform: scale(.985) !important; background: rgba(255,255,255,.12); }
+html body .dock .ico.pr { transform: scale(.9) !important; }
+html body button, html body .btn, html body [data-go], html body .sug, html body .li { touch-action: manipulation; cursor: pointer; }
+
+/* --- listes : defilement natif fluide --- */
+html body .libbody, html body .setbody, html body .panel, html body .lpanel, html body .sheet { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+
+/* --- petits defauts visuels --- */
+html body #s-map .maplibregl-ctrl-bottom-right { bottom: 96px; }
+html body #s-home .maplibregl-ctrl-bottom-right { bottom: 4px; right: 4px; }
+html body .maplibregl-ctrl-attrib.maplibregl-compact { background: rgba(8,9,12,.5) !important; border-radius: 12px; }
+
+/* production : pas de mode demo visible */
+html body .dock .mode, html body .demo-only { display: none !important; }

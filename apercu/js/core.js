@@ -63,6 +63,7 @@
   };
 
   // ---- Etat du vehicule ----
+  CD.settings.mode = 'gps';      // version de production : toujours le vrai GPS
   CD.state = {
     mode: CD.settings.mode, speed: 0, heading: 0, alt: null, acc: null,
     lat: CD.settings.demoStart.lat, lon: CD.settings.demoStart.lon,
